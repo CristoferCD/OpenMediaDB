@@ -1,2 +1,6 @@
 
 OpenMediaDB/\.idea/
+
+OpenMediaDB/omdb-api/src/main/resources/api-key\.txt
+
+OpenMediaDB/omdb-api/target/

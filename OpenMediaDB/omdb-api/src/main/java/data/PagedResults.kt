@@ -1,17 +1,17 @@
 package data
 
-import com.beust.klaxon.Json
+import com.google.gson.annotations.SerializedName
 
 data class PagedResults (
-        @Json(name = "Search")
+        @SerializedName("Search")
         val results: List<ImdbTitle>,
 
-        @Json(name = "totalResults")
-        val totalResults: Int,
+        @SerializedName("totalResults")
+        val totalResults: String,
 
-        @Json(name = "Response")
-        val responseError: Boolean,
+        @SerializedName("Response")
+        val responseSuccessful: String,
 
-        @Json(name = "Error")
+        @SerializedName("Error")
         val errorMsg: String?
 )

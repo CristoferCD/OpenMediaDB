@@ -1,35 +1,35 @@
 package data
 
-import com.beust.klaxon.Json
+import com.google.gson.annotations.SerializedName
 
 data class ImdbTitle (
-        @Json(name = "Title")
+        @SerializedName("Title")
         val title: String,
 
-        @Json(name = "Year")
-        val year: String,
+        @SerializedName("Year")
+        var year: String = "",
 
-        @Json(name = "Runtime")
-        val duration: String,
+        @SerializedName("Runtime")
+        var duration: String = "",
 
-        @Json(name = "Genre")
-        val genre: String,
+        @SerializedName("Genre")
+        var genre: String = "",
 
-        @Json(name = "Poster")
-        val imgPoster: String,
+        @SerializedName("Poster")
+        var imgPoster: String = "",
 
-        @Json(name = "imdbRating")
-        val rating: String,
+        @SerializedName("imdbRating")
+        var rating: String = "",
 
-        @Json(name = "imdbID")
+        @SerializedName("imdbID")
         val imdbId: String,
 
-        @Json(name = "Type")
+        @SerializedName("Type")
         val type: String,
 
-        @Json(name = "Response")
-        val responseError: Boolean,
+        @SerializedName("Response")
+        var responseSuccessful: String = "",
 
-        @Json(name = "Error")
-        val errorMsg: String?
+        @SerializedName("Error")
+        var errorMsg: String = ""
 )
