@@ -2,7 +2,7 @@ package data
 
 import com.google.gson.annotations.SerializedName
 
-data class ImdbTitle (
+data class ImdbTitle(
         @SerializedName("Title")
         val title: String,
 

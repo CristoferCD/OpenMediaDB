@@ -20,6 +20,12 @@ class OmdbAPITest {
     }
 
     @Test
+    fun byIdError() {
+        val result = OmdbAPI.getById("wrong_id")
+        assert(result.responseSuccessful == "False")
+    }
+
+    @Test
     fun search() {
         val result = OmdbAPI.search("the flash")
         assert(result.results.any { it.title == "The Flash"})

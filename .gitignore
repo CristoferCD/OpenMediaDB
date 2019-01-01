@@ -4,3 +4,7 @@ OpenMediaDB/\.idea/
 OpenMediaDB/omdb-api/src/main/resources/api-key\.txt
 
 OpenMediaDB/omdb-api/target/
+
+OpenMediaDB/file-crawler/target/
+
+OpenMediaDB/omdb-api/src/test/java/OmdbAPITest\.kt

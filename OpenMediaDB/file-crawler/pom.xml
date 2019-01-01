@@ -9,9 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>omdb-api</artifactId>
+    <artifactId>file-crawler</artifactId>
 
-    <dependencies>
-    </dependencies>
 
 </project>
