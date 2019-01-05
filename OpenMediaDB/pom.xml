@@ -11,6 +11,7 @@
     <modules>
         <module>omdb-api</module>
         <module>file-crawler</module>
+        <module>data-manager</module>
     </modules>
 
     <repositories>

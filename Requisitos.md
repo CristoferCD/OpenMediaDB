@@ -15,3 +15,6 @@
 * FR04: Update files and folders according to correct names
 * FR05: Add file on correct location with correct name
 
+#### DBManager
+
+* FR01: Cache images on a folder
