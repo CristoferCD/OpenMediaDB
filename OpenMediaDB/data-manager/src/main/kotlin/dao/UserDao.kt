@@ -2,10 +2,7 @@ package dao
 
 import data.User
 import data.tables.UserTable
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.insertAndGetId
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.*
 
 class UserDao : IBaseDao<User, Int> {
     override fun get(key: Int): User {
@@ -19,18 +16,21 @@ class UserDao : IBaseDao<User, Int> {
     }
 
     override fun insert(obj: User): Int {
-        UserTable.insertAndGetId {
+        return UserTable.insertAndGetId {
             it[name] = obj.name
-
-        }
+            it[password] = obj.password
+        }.value
     }
 
     override fun update(obj: User) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        UserTable.update({ UserTable.id eq obj.id}) {
+            it[name] = obj.name
+            it[password] = obj.password
+        }
     }
 
     override fun delete(key: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        UserTable.deleteWhere { UserTable.id eq key }
     }
 
     private fun toUser(data: ResultRow): User {

@@ -2,6 +2,8 @@ package dao
 
 import data.Video
 import data.tables.FileInfoTable
+import data.tables.SeenTable
+import data.tables.UserTable
 import data.tables.VideoTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -45,11 +47,26 @@ class VideoDao : IBaseDao<Video, Int> {
         }
     }
 
+    fun markWatched(watched: Boolean, userId: Int, videoId: Int) {
+        transaction {
+            val existingEntry = SeenTable.select { (SeenTable.userId eq userId) and (SeenTable.videoId eq videoId) }.firstOrNull()
+            if (existingEntry == null) {
+                SeenTable.insert {
+                    it[SeenTable.userId] = UserTable.select { UserTable.id eq userId }.first()[id]
+                    it[SeenTable.videoId] = VideoTable.select { VideoTable.id eq videoId }.first()[id]
+                    it[SeenTable.seen] = watched
+                }
+            } else {
+                existingEntry[SeenTable.seen] = watched
+            }
+        }
+    }
+
     override fun delete(key: Int) {
         transaction {
             val video = VideoTable.select { VideoTable.id eq key }.first()
             VideoTable.deleteWhere { VideoTable.id eq key }
-            FileInfoTable.deleteWhere { FileInfoTable.id eq video[VideoTable.fileId]?.value}
+            FileInfoTable.deleteWhere { FileInfoTable.id eq video[VideoTable.fileId]?.value }
         }
 
     }

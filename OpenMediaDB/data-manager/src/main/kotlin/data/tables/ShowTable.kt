@@ -7,5 +7,5 @@ object ShowTable: Table("Show") {
     val name = varchar("name", 255)
     val imgPoster = text("imgPoster").nullable()
     val imgBackground = text("imgBackground").nullable()
-    val path = text("path").nullable()
+    val path = text("path")
 }
