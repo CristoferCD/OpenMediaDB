@@ -8,3 +8,7 @@ OpenMediaDB/omdb-api/target/
 OpenMediaDB/file-crawler/target/
 
 OpenMediaDB/omdb-api/src/test/java/OmdbAPITest\.kt
+
+OpenMediaDB/data-manager/target/
+
+*.db

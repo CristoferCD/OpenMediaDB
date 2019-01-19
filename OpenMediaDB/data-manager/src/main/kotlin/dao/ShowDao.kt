@@ -14,17 +14,21 @@ class ShowDao : IBaseDao<Show, String> {
 
     override fun getAll(): List<Show> {
         val shows = mutableListOf<Show>()
-        ShowTable.selectAll().forEach { shows.add(toShow(it)) }
+        transaction {
+            ShowTable.selectAll().forEach { shows.add(toShow(it)) }
+        }
         return shows
     }
 
     override fun insert(obj: Show): String {
-        ShowTable.insert {
-            it[imdbId] = obj.imdbId
-            it[name] = obj.name
-            it[imgPoster] = obj.imgPoster
-            it[imgBackground] = obj.imgBackground
-            it[path] = obj.path
+        transaction {
+            ShowTable.insert {
+                it[imdbId] = obj.imdbId
+                it[name] = obj.name
+                it[imgPoster] = obj.imgPoster
+                it[imgBackground] = obj.imgBackground
+                it[path] = obj.path
+            }
         }
         return obj.imdbId
     }
