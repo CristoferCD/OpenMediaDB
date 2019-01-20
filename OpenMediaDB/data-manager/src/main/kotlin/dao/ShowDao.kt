@@ -9,7 +9,11 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 class ShowDao : IBaseDao<Show, String> {
     override fun get(key: String): Show {
-        return toShow(ShowTable.select { ShowTable.imdbId eq key }.first())
+        return toShow(
+                transaction {
+                    ShowTable.select { ShowTable.imdbId eq key }
+                }.first()
+        )
     }
 
     override fun getAll(): List<Show> {
@@ -34,16 +38,20 @@ class ShowDao : IBaseDao<Show, String> {
     }
 
     override fun update(obj: Show) {
-        ShowTable.update({ ShowTable.imdbId eq obj.imdbId }) {
-            it[name] = obj.name
-            it[imgPoster] = obj.imgPoster
-            it[imgBackground] = obj.imgBackground
-            it[path] = obj.path
+        transaction {
+            ShowTable.update({ ShowTable.imdbId eq obj.imdbId }) {
+                it[name] = obj.name
+                it[imgPoster] = obj.imgPoster
+                it[imgBackground] = obj.imgBackground
+                it[path] = obj.path
+            }
         }
     }
 
     override fun delete(key: String) {
-        ShowTable.deleteWhere { ShowTable.imdbId eq key }
+        transaction {
+            ShowTable.deleteWhere { ShowTable.imdbId eq key }
+        }
     }
 
     fun follow(follow: Boolean, showId: String, userId: Int) {
