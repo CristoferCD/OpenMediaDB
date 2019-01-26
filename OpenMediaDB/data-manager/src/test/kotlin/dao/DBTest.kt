@@ -1,7 +1,8 @@
 package dao
 
 import data.Show
-import data.tables.ShowTable
+import data.Video
+import data.tables.*
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.TransactionManager
@@ -18,26 +19,9 @@ internal class DBTest {
     @Test
     fun insertShow() {
         val show = Show("tt3949232", "Test", path = "/Test")
-        val dao = ShowDao()
+        val dao = DataManagerFactory.showDao
         dao.insert(show)
 
         dao.getAll().forEach { println(it) }
-    }
-
-    companion object {
-        @BeforeAll
-        @JvmStatic
-        internal fun setup() {
-            Database.connect("jdbc:sqlite:demo.db", driver = "org.sqlite.JDBC")
-            TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
-            transaction {
-                SchemaUtils.create(ShowTable)
-            }
-        }
-
-        @AfterAll
-        @JvmStatic
-        internal fun cleanUp() {
-        }
     }
 }

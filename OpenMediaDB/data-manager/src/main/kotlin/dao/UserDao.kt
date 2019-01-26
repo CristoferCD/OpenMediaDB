@@ -5,10 +5,10 @@ import data.tables.UserTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
-class UserDao : IBaseDao<User, Int> {
+class UserDao(override val dbConnection: Database) : IBaseDao<User, Int> {
     override fun get(key: Int): User {
         return toUser(
-                transaction {
+                transaction(dbConnection) {
                     UserTable.select { UserTable.id eq key }
                 }.first()
         )
@@ -16,14 +16,14 @@ class UserDao : IBaseDao<User, Int> {
 
     override fun getAll(): List<User> {
         val userList = mutableListOf<User>()
-        transaction {
+        transaction(dbConnection) {
             UserTable.selectAll()
         }.forEach { userList.add(toUser(it)) }
         return userList
     }
 
     override fun insert(obj: User): Int {
-        return transaction {
+        return transaction(dbConnection) {
             UserTable.insertAndGetId {
                 it[name] = obj.name
                 it[password] = obj.password
@@ -32,7 +32,7 @@ class UserDao : IBaseDao<User, Int> {
     }
 
     override fun update(obj: User) {
-        transaction {
+        transaction(dbConnection) {
             UserTable.update({ UserTable.id eq obj.id }) {
                 it[name] = obj.name
                 it[password] = obj.password
@@ -41,7 +41,7 @@ class UserDao : IBaseDao<User, Int> {
     }
 
     override fun delete(key: Int) {
-        transaction {
+        transaction(dbConnection) {
             UserTable.deleteWhere { UserTable.id eq key }
         }
     }

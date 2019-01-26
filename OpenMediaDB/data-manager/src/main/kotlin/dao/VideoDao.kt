@@ -8,10 +8,10 @@ import data.tables.VideoTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
-class VideoDao : IBaseDao<Video, Int> {
+class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
     override fun get(key: Int): Video {
         return toVideo(
-                transaction {
+                transaction(dbConnection) {
                     VideoTable.select { VideoTable.id eq key }
                 }.first()
         )
@@ -19,7 +19,7 @@ class VideoDao : IBaseDao<Video, Int> {
 
     fun get(imdbId: String): Video {
         return toVideo(
-                transaction {
+                transaction(dbConnection) {
                     VideoTable.select { VideoTable.imdbId eq imdbId }
                 }.first()
         )
@@ -27,12 +27,12 @@ class VideoDao : IBaseDao<Video, Int> {
 
     override fun getAll(): List<Video> {
         val videos = mutableListOf<Video>()
-        transaction { VideoTable.selectAll() }.forEach { videos.add(toVideo(it)) }
+        transaction(dbConnection) { VideoTable.selectAll() }.forEach { videos.add(toVideo(it)) }
         return videos
     }
 
     override fun insert(obj: Video): Int {
-        return transaction {
+        return transaction(dbConnection) {
             VideoTable.insertAndGetId {
                 it[showId] = obj.showId
                 it[imdbId] = obj.imdbId
@@ -46,7 +46,7 @@ class VideoDao : IBaseDao<Video, Int> {
     }
 
     override fun update(obj: Video) {
-        transaction {
+        transaction(dbConnection) {
             VideoTable.update({ VideoTable.id eq obj.id }) {
                 it[fileId] = FileInfoTable.select { FileInfoTable.id eq obj.fileId }.first()[id]
                 it[imdbId] = obj.imdbId
@@ -60,7 +60,7 @@ class VideoDao : IBaseDao<Video, Int> {
     }
 
     fun markWatched(watched: Boolean, userId: Int, videoId: Int) {
-        transaction {
+        transaction(dbConnection) {
             val existingEntry = SeenTable.select { (SeenTable.userId eq userId) and (SeenTable.videoId eq videoId) }.firstOrNull()
             if (existingEntry == null) {
                 SeenTable.insert {
@@ -75,7 +75,7 @@ class VideoDao : IBaseDao<Video, Int> {
     }
 
     override fun delete(key: Int) {
-        transaction {
+        transaction(dbConnection) {
             val video = VideoTable.select { VideoTable.id eq key }.first()
             VideoTable.deleteWhere { VideoTable.id eq key }
             FileInfoTable.deleteWhere { FileInfoTable.id eq video[VideoTable.fileId]?.value }

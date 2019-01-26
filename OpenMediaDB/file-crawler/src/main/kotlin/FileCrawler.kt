@@ -1,17 +1,27 @@
 import data.ImportResult
 import data.VideoFileInfo
 import java.io.File
-import java.nio.file.CopyOption
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
+import java.io.FileInputStream
+import java.nio.file.*
+import java.util.*
 import java.util.regex.Pattern
 
-class FileCrawler (val libraryRoot: String){
-
-    val directoryPattern: String = "#(name)/#(season)ª Temp"
-    val shownamePattern: String = "(?<name>.+) (?<season>.+)x(?<episode>.+)"
+class FileCrawler {
+    private val CONFIG_FILE = "config.properties"
+    private val properties = Properties()
+    var libraryRoot: String = ""
+    var directoryPattern: String = ""
+    var shownamePattern: String = ""
     //TODO: shownamePatter must at least have name, season and episode number
+
+    init {
+        this.javaClass.getResourceAsStream(CONFIG_FILE).use {
+            properties.load(it)
+            libraryRoot = properties.getProperty("library.root") ?: ""
+            directoryPattern = properties.getProperty("pattern.directory") ?: "#(name)/#(season)ª Temp"
+            shownamePattern = properties.getProperty("pattern.showname") ?: "(?<name>.+) (?<season>.+)x(?<episode>.+)"
+        }
+    }
 
     fun walkTest() {
         File("\\\\ORANGEPIZERO\\opiserver\\Anime").walk().forEach {

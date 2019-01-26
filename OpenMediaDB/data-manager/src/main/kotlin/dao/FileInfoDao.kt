@@ -5,10 +5,10 @@ import data.tables.FileInfoTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
-class FileInfoDao : IBaseDao<FileInfo, Int> {
+class FileInfoDao(override val dbConnection: Database) : IBaseDao<FileInfo, Int> {
     override fun get(key: Int): FileInfo {
         return toFileInfo(
-            transaction {
+            transaction(dbConnection) {
                 FileInfoTable.select { FileInfoTable.id eq key }
             }.first()
         )
@@ -16,14 +16,14 @@ class FileInfoDao : IBaseDao<FileInfo, Int> {
 
     override fun getAll(): List<FileInfo> {
         val files = mutableListOf<FileInfo>()
-        transaction {
+        transaction(dbConnection) {
             FileInfoTable.selectAll()
         }.forEach { files.add(toFileInfo(it)) }
         return files
     }
 
     override fun insert(obj: FileInfo): Int {
-        return transaction {
+        return transaction(dbConnection) {
             FileInfoTable.insertAndGetId {
                 it[uri] = obj.uri
                 it[duration] = obj.duration
@@ -35,7 +35,7 @@ class FileInfoDao : IBaseDao<FileInfo, Int> {
     }
 
     override fun update(obj: FileInfo) {
-        transaction {
+        transaction(dbConnection) {
             FileInfoTable.update({ FileInfoTable.id eq obj.id }) {
                 it[uri] = obj.uri
                 it[duration] = obj.duration
@@ -47,7 +47,7 @@ class FileInfoDao : IBaseDao<FileInfo, Int> {
     }
 
     override fun delete(key: Int) {
-        transaction {
+        transaction(dbConnection) {
             FileInfoTable.deleteWhere { FileInfoTable.id eq key }
         }
     }

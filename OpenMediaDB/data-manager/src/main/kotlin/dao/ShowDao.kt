@@ -7,10 +7,10 @@ import data.tables.UserTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
-class ShowDao : IBaseDao<Show, String> {
+class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
     override fun get(key: String): Show {
         return toShow(
-                transaction {
+                transaction(dbConnection) {
                     ShowTable.select { ShowTable.imdbId eq key }
                 }.first()
         )
@@ -18,14 +18,14 @@ class ShowDao : IBaseDao<Show, String> {
 
     override fun getAll(): List<Show> {
         val shows = mutableListOf<Show>()
-        transaction {
+        transaction(dbConnection) {
             ShowTable.selectAll().forEach { shows.add(toShow(it)) }
         }
         return shows
     }
 
     override fun insert(obj: Show): String {
-        transaction {
+        transaction(dbConnection) {
             ShowTable.insert {
                 it[imdbId] = obj.imdbId
                 it[name] = obj.name
@@ -38,7 +38,7 @@ class ShowDao : IBaseDao<Show, String> {
     }
 
     override fun update(obj: Show) {
-        transaction {
+        transaction(dbConnection) {
             ShowTable.update({ ShowTable.imdbId eq obj.imdbId }) {
                 it[name] = obj.name
                 it[imgPoster] = obj.imgPoster
@@ -49,13 +49,13 @@ class ShowDao : IBaseDao<Show, String> {
     }
 
     override fun delete(key: String) {
-        transaction {
+        transaction(dbConnection) {
             ShowTable.deleteWhere { ShowTable.imdbId eq key }
         }
     }
 
     fun follow(follow: Boolean, showId: String, userId: Int) {
-        transaction {
+        transaction(dbConnection) {
             val existingEntry = ShowTable.select { (FollowingTable.showId eq showId) and (FollowingTable.userId eq userId) }.firstOrNull()
             if (existingEntry == null) {
                 FollowingTable.insert {

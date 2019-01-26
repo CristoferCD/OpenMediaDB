@@ -12,3 +12,5 @@ OpenMediaDB/omdb-api/src/test/java/OmdbAPITest\.kt
 OpenMediaDB/data-manager/target/
 
 *.db
+
+OpenMediaDB/target/

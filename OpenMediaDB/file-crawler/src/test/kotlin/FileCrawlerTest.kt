@@ -5,13 +5,13 @@ internal class FileCrawlerTest {
 
     @Test
     fun walkTest() {
-        var test = FileCrawler("")
+        var test = FileCrawler()
         test.walkTest()
     }
 
     @Test
     fun importTest() {
-        var crawler = FileCrawler("\\\\ORANGEPIZERO\\opiserver\\Series")
+        var crawler = FileCrawler()
         val result = crawler.importLibrary(File("F:\\crist\\Downloads\\Apartamento 23"))
         println(result.successfulImports)
         println(result.failedImports)
