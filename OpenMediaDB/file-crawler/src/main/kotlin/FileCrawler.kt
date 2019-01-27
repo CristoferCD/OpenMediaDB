@@ -1,5 +1,6 @@
 import data.ImportResult
 import data.VideoFileInfo
+import exceptions.FileParseException
 import java.io.File
 import java.io.FileInputStream
 import java.nio.file.*
@@ -55,14 +56,14 @@ class FileCrawler {
     }
 
     fun parseFileInfo(file: File) : VideoFileInfo {
-        val match = Pattern.compile(shownamePattern).matcher(file.nameWithoutExtension)
-        if (match.matches()) {
-            return VideoFileInfo(match.group("name"), match.group("season"),
-                    match.group("episode"),
-                    if (shownamePattern.contains("(?<episodeName>")) match.group("episodeName") else "",
+        val match = Regex(shownamePattern).matchEntire(file.nameWithoutExtension)
+        if (match != null) {
+            return VideoFileInfo(match.groups["name"]!!.value, match.groups["season"]!!.value,
+                    match.groups["episode"]!!.value,
+                    if (shownamePattern.contains("(?<episodeName>")) match.groups["episodeName"]!!.value else "",
                     file.absolutePath)
         }
-        throw Exception()
+        throw FileParseException(file, shownamePattern)
     }
 
     private fun importFile(from: File, destructive: Boolean) : VideoFileInfo {

@@ -12,6 +12,18 @@ data class ImdbTitle(
         @SerializedName("Runtime")
         var duration: String = "",
 
+        @SerializedName("Released")
+        var releaseDate: String = "",
+
+        @SerializedName("Season")
+        var season: String = "",
+
+        @SerializedName("Episode")
+        var episode: String = "",
+
+        @SerializedName("Plot")
+        var sinopsis: String = "",
+
         @SerializedName("Genre")
         var genre: String = "",
 
@@ -23,6 +35,9 @@ data class ImdbTitle(
 
         @SerializedName("imdbID")
         val imdbId: String,
+
+        @SerializedName("seriesID")
+        var parentId: String = "",
 
         @SerializedName("Type")
         val type: String,
