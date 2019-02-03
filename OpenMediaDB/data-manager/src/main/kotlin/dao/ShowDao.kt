@@ -29,6 +29,7 @@ class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
             ShowTable.insert {
                 it[imdbId] = obj.imdbId
                 it[name] = obj.name
+                it[sinopsis] = obj.sinopsis
                 it[imgPoster] = obj.imgPoster
                 it[imgBackground] = obj.imgBackground
                 it[path] = obj.path
@@ -41,6 +42,7 @@ class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
         transaction(dbConnection) {
             ShowTable.update({ ShowTable.imdbId eq obj.imdbId }) {
                 it[name] = obj.name
+                it[sinopsis] = obj.sinopsis
                 it[imgPoster] = obj.imgPoster
                 it[imgBackground] = obj.imgBackground
                 it[path] = obj.path
@@ -71,6 +73,7 @@ class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
         return Show(
                 imdbId = data[ShowTable.imdbId],
                 name = data[ShowTable.name],
+                sinopsis = data[ShowTable.sinopsis],
                 imgPoster = data[ShowTable.imgPoster],
                 imgBackground = data[ShowTable.imgBackground],
                 path = data[ShowTable.path]

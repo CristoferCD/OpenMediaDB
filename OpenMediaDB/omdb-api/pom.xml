@@ -11,7 +11,4 @@
 
     <artifactId>omdb-api</artifactId>
 
-    <dependencies>
-    </dependencies>
-
 </project>

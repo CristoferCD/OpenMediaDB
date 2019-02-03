@@ -18,7 +18,7 @@ internal class DBTest {
 
     @Test
     fun insertShow() {
-        val show = Show("tt3949232", "Test", path = "/Test")
+        val show = Show("tt3949232", "Test", "Sinopsis", path = "/Test")
         val dao = DataManagerFactory.showDao
         dao.insert(show)
 

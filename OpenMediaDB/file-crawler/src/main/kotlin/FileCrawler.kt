@@ -2,8 +2,9 @@ import data.ImportResult
 import data.VideoFileInfo
 import exceptions.FileParseException
 import java.io.File
-import java.io.FileInputStream
-import java.nio.file.*
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
 import java.util.*
 import java.util.regex.Pattern
 

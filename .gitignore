@@ -14,3 +14,5 @@ OpenMediaDB/data-manager/target/
 *.db
 
 OpenMediaDB/target/
+
+OpenMediaDB/open-media-db-parent/target/
