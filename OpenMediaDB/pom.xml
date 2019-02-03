@@ -12,7 +12,7 @@
         <module>omdb-api</module>
         <module>file-crawler</module>
         <module>data-manager</module>
-        <module>open-media-db</module>
+        <module>open-media-db-parent</module>
     </modules>
 
     <repositories>

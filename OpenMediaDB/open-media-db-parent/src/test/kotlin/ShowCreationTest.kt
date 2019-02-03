@@ -1,5 +1,6 @@
 import data.Show
 import data.VideoFileInfo
+import data.tmdb.TMDbFactory
 import exceptions.FileParseException
 import info.movito.themoviedbapi.*
 import info.movito.themoviedbapi.model.tv.TvSeries
@@ -35,9 +36,18 @@ class ShowCreationTest {
     }
 
     @Test
+    fun dslTest() {
+        TMDbFactory {
+            create()
+
+            getByID(2)
+        }
+    }
+
+    @Test
     fun fullImport() {
         val crawler = FileCrawler()
-        val tmdbApi = TmdbApi("612ee3337f576410479963d2067a6143")
+        val tmdbApi = TmdbApi("")
         var info: VideoFileInfo
         val show = OmdbAPI.getByTitle("Rascal Does Not Dream of Bunny Girl Senpai")
         var tmdbShow = TvSeries()
