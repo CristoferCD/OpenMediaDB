@@ -16,3 +16,5 @@ OpenMediaDB/data-manager/target/
 OpenMediaDB/target/
 
 OpenMediaDB/open-media-db-parent/target/
+
+*.iml

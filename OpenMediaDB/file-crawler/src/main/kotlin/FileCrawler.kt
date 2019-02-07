@@ -6,7 +6,6 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.util.*
-import java.util.regex.Pattern
 
 class FileCrawler {
     private val CONFIG_FILE = "config.properties"
@@ -25,23 +24,7 @@ class FileCrawler {
         }
     }
 
-    fun walkTest() {
-        File("\\\\ORANGEPIZERO\\opiserver\\Anime").walk().forEach {
-            println("Analyzing ${it.canonicalPath}")
-            if (it.isFile) {
-                //match shownamePattern
-                val match = Pattern.compile(shownamePattern).matcher(it.nameWithoutExtension)
-                //if got a full match, create entry and move to library
-                if (match.matches()) {
-                    println("Found episode ${match.group("name")} of season ${match.group("season")} and number ${match.group("episode")}")
-                }
-
-                //else ask for data and move to library
-            }
-        }
-    }
-
-    fun importLibrary(from: File, destructive: Boolean = false) : ImportResult {
+    fun importLibrary(from: File, destructive: Boolean = false): ImportResult {
         val result = ImportResult()
         from.walk().forEach {
             if (it.isFile) {
@@ -56,7 +39,7 @@ class FileCrawler {
         return result
     }
 
-    fun parseFileInfo(file: File) : VideoFileInfo {
+    fun parseFileInfo(file: File): VideoFileInfo {
         val match = Regex(shownamePattern).matchEntire(file.nameWithoutExtension)
         if (match != null) {
             return VideoFileInfo(match.groups["name"]!!.value, match.groups["season"]!!.value,
@@ -67,7 +50,7 @@ class FileCrawler {
         throw FileParseException(file, shownamePattern)
     }
 
-    private fun importFile(from: File, destructive: Boolean) : VideoFileInfo {
+    private fun importFile(from: File, destructive: Boolean): VideoFileInfo {
         val fileInfo = parseFileInfo(from)
         var directoryTarget = directoryPattern.replace("#(name)", fileInfo.name)
         directoryTarget = directoryTarget.replace("#(season)", fileInfo.season)
