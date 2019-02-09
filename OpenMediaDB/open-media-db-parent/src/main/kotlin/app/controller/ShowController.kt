@@ -1,15 +1,28 @@
 package app.controller
 
 import DataManagerFactory
+import data.Show
+import data.request.FollowRequestRB
 import data.tmdb.TMDbBuilder
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/shows")
 class ShowController {
+
+    @GetMapping("/following")
+    fun getFollowing() : List<Show> {
+        val authenticatedUser = 1
+        return DataManagerFactory.showDao.listFollowing(authenticatedUser)
+    }
+
+    @PostMapping("/following")
+    fun doFollow(@RequestBody followRequest: FollowRequestRB) : Boolean {
+        val authenticatedUser = 1
+        DataManagerFactory.showDao.follow(followRequest.doFollow, followRequest.showId, authenticatedUser)
+        //TODO: check
+        return true
+    }
 
     @GetMapping("/all")
     fun getAllLocal(): List<String> {
@@ -21,7 +34,7 @@ class ShowController {
     }
 
     @GetMapping("/search")
-    fun searchOnline(@RequestParam("name") name: String): List<String> {
+    fun searchOnline(@RequestParam name: String): List<String> {
         val returnList = mutableListOf<String>()
         val api = TMDbBuilder().create()
         api.search.searchTv(name, "en", 0).results?.let {

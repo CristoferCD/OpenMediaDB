@@ -1,21 +1,23 @@
 package data.tmdb
 
 import info.movito.themoviedbapi.TmdbApi
+import org.springframework.core.io.ClassPathResource
 import java.util.*
 
 //TODO: return custom wrapper
-class TMDbBuilder {
+internal class TMDbBuilder {
     private var configFile = "tmdb-config.properties"
     private val properties = Properties()
     private var apikey: String? = null
     private var languageCode = "en"
 
     init {
-        this.javaClass.getResourceAsStream(configFile).use {
+        ClassPathResource(configFile).inputStream.use {
             properties.load(it)
             apikey = properties.getProperty("apikey") ?: throw TMDbNotInitializedException("API key not set")
             languageCode = properties.getProperty("default.language") ?: "en"
         }
+
     }
 
     fun create(): TmdbApi {
@@ -35,9 +37,9 @@ class TMDbBuilder {
     }
 }
 
-class TMDbNotInitializedException(msg: String) : Exception(msg)
+internal class TMDbNotInitializedException(msg: String) : Exception(msg)
 
-fun tmdbApi(setup: TMDbBuilder.() -> Unit): TmdbApi {
+internal fun tmdbApi(setup: TMDbBuilder.() -> Unit): TmdbApi {
     val builder = TMDbBuilder()
     builder.setup()
     return builder.create()

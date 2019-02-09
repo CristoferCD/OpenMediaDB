@@ -69,6 +69,17 @@ class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
         }
     }
 
+    fun listFollowing(userId: Int) : List<Show> {
+        val shows = mutableListOf<Show>()
+        transaction(dbConnection) {
+            (FollowingTable innerJoin ShowTable)
+                    .select {(FollowingTable.userId eq userId and FollowingTable.following)}
+        }.forEach {
+            shows.add(toShow(it))
+        }
+        return shows
+    }
+
     private fun toShow(data: ResultRow): Show {
         return Show(
                 imdbId = data[ShowTable.imdbId],

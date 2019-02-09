@@ -2,7 +2,7 @@ package data.tables
 
 import org.jetbrains.exposed.dao.IntIdTable
 
-object VideoTable: IntIdTable("Video") {
+internal object VideoTable: IntIdTable("Video") {
     val fileId = reference("fileId", FileInfoTable).nullable()
     val showId = reference("showId", ShowTable.imdbId)
     val imdbId = varchar("imdbId", 15).nullable().uniqueIndex()
