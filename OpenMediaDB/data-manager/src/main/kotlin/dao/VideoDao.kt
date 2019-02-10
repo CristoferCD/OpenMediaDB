@@ -1,40 +1,42 @@
 package dao
 
 import data.Video
-import data.tables.FileInfoTable
-import data.tables.SeenTable
-import data.tables.UserTable
-import data.tables.VideoTable
+import data.tables.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
-    override fun get(key: Int): Video {
-        return toVideo(
-                transaction(dbConnection) {
-                    VideoTable.select { VideoTable.id eq key }
-                }.first()
-        )
+    override fun get(key: Int): Video? {
+        var video: Video? = null
+        transaction(dbConnection) {
+            VideoTable.select { VideoTable.id eq key }
+                    .first().let { video = toVideo(it) }
+        }
+        return video
     }
 
-    fun get(imdbId: String): Video {
-        return toVideo(
-                transaction(dbConnection) {
-                    VideoTable.select { VideoTable.imdbId eq imdbId }
-                }.first()
-        )
+    fun get(imdbId: String): Video? {
+        var video: Video? = null
+        transaction(dbConnection) {
+            VideoTable.select { VideoTable.imdbId eq imdbId }
+                    .first().let { video = toVideo(it) }
+        }
+        return video
     }
 
     override fun getAll(): List<Video> {
         val videos = mutableListOf<Video>()
-        transaction(dbConnection) { VideoTable.selectAll() }.forEach { videos.add(toVideo(it)) }
+        transaction(dbConnection) {
+            VideoTable.selectAll()
+                    .forEach { videos.add(toVideo(it)) }
+        }
         return videos
     }
 
     override fun insert(obj: Video): Int {
         return transaction(dbConnection) {
             VideoTable.insertAndGetId {
-                it[showId] = obj.showId
+                it[showId] = ShowTable.select { ShowTable.id eq obj.showId }.first()[ShowTable.id]
                 it[imdbId] = obj.imdbId
                 it[name] = obj.name
                 it[season] = obj.season
@@ -83,11 +85,28 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
 
     }
 
+    fun findFromParent(showId: String, season: Int? = null, episode: Int? = null): List<Video> {
+        val found = mutableListOf<Video>()
+        transaction(dbConnection) {
+            val query = VideoTable.select { VideoTable.showId eq showId }
+            season?.let {
+                query.andWhere { VideoTable.season eq season }
+            }
+            episode?.let {
+                query.andWhere { VideoTable.episodeNumber eq episode }
+            }
+            query.forEach {
+                found.add(toVideo(it))
+            }
+        }
+        return found
+    }
+
     private fun toVideo(data: ResultRow): Video {
         return Video(
                 id = data[VideoTable.id].value,
                 fileId = data[VideoTable.fileId]?.value,
-                showId = data[VideoTable.showId],
+                showId = data[VideoTable.showId].value,
                 imdbId = data[VideoTable.imdbId],
                 name = data[VideoTable.name],
                 season = data[VideoTable.season],

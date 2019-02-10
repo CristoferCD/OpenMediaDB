@@ -6,19 +6,21 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class UserDao(override val dbConnection: Database) : IBaseDao<User, Int> {
-    override fun get(key: Int): User {
-        return toUser(
-                transaction(dbConnection) {
-                    UserTable.select { UserTable.id eq key }
-                }.first()
-        )
+    override fun get(key: Int): User? {
+        var user: User? = null
+        transaction(dbConnection) {
+            UserTable.select { UserTable.id eq key }
+                    .first().let { user = toUser(it) }
+        }
+        return user
     }
 
     override fun getAll(): List<User> {
         val userList = mutableListOf<User>()
         transaction(dbConnection) {
             UserTable.selectAll()
-        }.forEach { userList.add(toUser(it)) }
+                    .forEach { userList.add(toUser(it)) }
+        }
         return userList
     }
 

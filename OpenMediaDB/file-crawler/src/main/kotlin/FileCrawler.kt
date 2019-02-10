@@ -2,7 +2,9 @@ import data.ImportResult
 import data.VideoFileInfo
 import exceptions.FileParseException
 import java.io.File
+import java.net.URI
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.util.*
@@ -40,14 +42,29 @@ class FileCrawler {
     }
 
     fun parseFileInfo(file: File): VideoFileInfo {
-        val match = Regex(shownamePattern).matchEntire(file.nameWithoutExtension)
+        return parseFileName(file.nameWithoutExtension)
+    }
+
+    fun parseFileName(name: String): VideoFileInfo {
+        val match = Regex(shownamePattern).matchEntire(name)
         if (match != null) {
             return VideoFileInfo(match.groups["name"]!!.value, match.groups["season"]!!.value,
                     match.groups["episode"]!!.value,
                     if (shownamePattern.contains("(?<episodeName>")) match.groups["episodeName"]!!.value else "",
-                    file.absolutePath)
+                    name)
         }
-        throw FileParseException(file, shownamePattern)
+        throw FileParseException(name, shownamePattern)
+    }
+
+    fun importData(info: VideoFileInfo, fileExtension: String, data: ByteArray): Path {
+        var directoryTarget = directoryPattern.replace("#(name)", info.name)
+        directoryTarget = directoryTarget.replace("#(season)", info.season)
+        directoryTarget = directoryTarget.replace("/", File.separator)
+        directoryTarget = directoryTarget.replace("\\", File.separator)
+        val targetPath = Paths.get(libraryRoot, directoryTarget, "${createCorrectName(info)}.$fileExtension")
+        Files.createDirectories(targetPath.parent)
+        Files.write(targetPath, data)
+        return targetPath
     }
 
     private fun importFile(from: File, destructive: Boolean): VideoFileInfo {
@@ -64,5 +81,11 @@ class FileCrawler {
             Files.copy(from.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING)
         fileInfo.path = targetPath.toString()
         return fileInfo
+    }
+
+    private fun createCorrectName(info: VideoFileInfo): String {
+        var name = shownamePattern.replace("(?<name>.+)", info.name)
+        name = name.replace("(?<season>.+)", info.season)
+        return name.replace("(?<episode>.+)", info.episode)
     }
 }

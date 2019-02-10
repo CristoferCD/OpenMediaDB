@@ -1,7 +1,7 @@
 package data
 
 data class Video (
-        val id: Int,
+        val id: Int?,
         var fileId: Int?,
         val showId: String,
         var imdbId: String?,

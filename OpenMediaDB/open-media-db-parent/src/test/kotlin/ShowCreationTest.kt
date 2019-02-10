@@ -30,7 +30,7 @@ class ShowCreationTest {
 //        println(fullInfo)
 //        var showDate = LocalDate.parse(fullInfo.firstAirDate)
 //        DataManagerFactory.showDao.insert(Show(
-//                imdbId = fullInfo.externalIds?.imdbId ?: throw Exception(),
+//                id = fullInfo.externalIds?.id ?: throw Exception(),
 //                name = fullInfo.name,
 //                sinopsis = fullInfo.overview,
 //                path = "/${fullInfo.name} (${showDate.year})",
@@ -56,7 +56,7 @@ class ShowCreationTest {
 //        var info: VideoFileInfo
 //        val show = OmdbAPI.getByTitle("Rascal Does Not Dream of Bunny Girl Senpai")
 //        var tmdbShow = TvSeries()
-//        tmdbApi.find.find(show.imdbId, TmdbFind.ExternalSource.imdb_id, "en")?.let {
+//        tmdbApi.find.find(show.id, TmdbFind.ExternalSource.imdb_id, "en")?.let {
 //            tmdbShow = it.tvResults?.first() ?: throw Exception()
 //        }
 //        var idx = 1
