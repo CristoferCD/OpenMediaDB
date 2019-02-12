@@ -4,7 +4,9 @@ import data.Show
 import data.tables.FollowingTable
 import data.tables.ShowTable
 import data.tables.UserTable
+import exceptions.ExistingEntityException
 import org.jetbrains.exposed.dao.EntityID
+import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -28,15 +30,21 @@ class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
     }
 
     override fun insert(obj: Show): String {
-        transaction(dbConnection) {
-            ShowTable.insert {
-                it[id] = EntityID(obj.imdbId, ShowTable)
-                it[name] = obj.name
-                it[sinopsis] = obj.sinopsis
-                it[imgPoster] = obj.imgPoster
-                it[imgBackground] = obj.imgBackground
-                it[path] = obj.path
+        try {
+            transaction(dbConnection) {
+                ShowTable.insert {
+                    it[id] = EntityID(obj.imdbId, ShowTable)
+                    it[name] = obj.name
+                    it[sinopsis] = obj.sinopsis
+                    it[imgPoster] = obj.imgPoster
+                    it[imgBackground] = obj.imgBackground
+                    it[path] = obj.path
+                }
             }
+        } catch (e: ExposedSQLException) {
+            if (e.toString().contains(Regex("[SQLITE_CONSTRAINT].*UNIQUE")))
+                throw ExistingEntityException("ShowTable", obj.imdbId, e)
+            else throw e
         }
         return obj.imdbId
     }

@@ -102,17 +102,17 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
         return found
     }
 
-    private fun toVideo(data: ResultRow): Video {
+    private fun toVideo(resultRow: ResultRow): Video {
         return Video(
-                id = data[VideoTable.id].value,
-                fileId = data[VideoTable.fileId]?.value,
-                showId = data[VideoTable.showId].value,
-                imdbId = data[VideoTable.imdbId],
-                name = data[VideoTable.name],
-                season = data[VideoTable.season],
-                episodeNumber = data[VideoTable.episodeNumber],
-                sinopsis = data[VideoTable.sinopsis],
-                imgPoster = data[VideoTable.imgPoster]
+                id = resultRow[VideoTable.id].value,
+                fileId = resultRow[VideoTable.fileId]?.value,
+                showId = resultRow[VideoTable.showId].value,
+                imdbId = resultRow[VideoTable.imdbId],
+                name = resultRow[VideoTable.name],
+                season = resultRow[VideoTable.season],
+                episodeNumber = resultRow[VideoTable.episodeNumber],
+                sinopsis = resultRow[VideoTable.sinopsis],
+                imgPoster = resultRow[VideoTable.imgPoster]
         )
     }
 
