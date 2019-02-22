@@ -1,6 +1,8 @@
 package dao
 
+import data.ExternalIds
 import data.Show
+import data.tables.ExternalIdsTable
 import data.tables.FollowingTable
 import data.tables.ShowTable
 import data.tables.UserTable
@@ -9,14 +11,17 @@ import org.jetbrains.exposed.dao.EntityID
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.io.Externalizable
 
 class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
     override fun get(key: String): Show? {
         var show: Show? = null
         transaction(dbConnection) {
-            ShowTable.select { ShowTable.id eq key }.first().let {
-                show = toShow(it)
-            }
+            (ShowTable innerJoin ExternalIdsTable)
+                    .select { ShowTable.id eq key }.limit(1)
+                    .firstOrNull()?.let {
+                        show = toShow(it)
+                    }
         }
         return show
     }
@@ -24,7 +29,10 @@ class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
     override fun getAll(): List<Show> {
         val shows = mutableListOf<Show>()
         transaction(dbConnection) {
-            ShowTable.selectAll().forEach { shows.add(toShow(it)) }
+            (ShowTable innerJoin ExternalIdsTable)
+                    .selectAll().forEach {
+                        shows.add(toShow(it))
+                    }
         }
         return shows
     }
@@ -32,6 +40,12 @@ class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
     override fun insert(obj: Show): String {
         try {
             transaction(dbConnection) {
+                val extId =ExternalIdsTable.insertAndGetId {
+                    it[imdbId] = obj.imdbId
+                    it[tmdbId] = obj.externalIds.tmdb
+                    it[traktId] = obj.externalIds.trakt
+                    it[tvdbId] = obj.externalIds.tvdb
+                }
                 ShowTable.insert {
                     it[id] = EntityID(obj.imdbId, ShowTable)
                     it[name] = obj.name
@@ -39,6 +53,7 @@ class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
                     it[imgPoster] = obj.imgPoster
                     it[imgBackground] = obj.imgBackground
                     it[path] = obj.path
+                    it[externalIds] = extId
                 }
             }
         } catch (e: ExposedSQLException) {
@@ -58,11 +73,17 @@ class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
                 it[imgBackground] = obj.imgBackground
                 it[path] = obj.path
             }
+            ExternalIdsTable.update({ ExternalIdsTable.imdbId eq obj.imdbId }) {
+                it[tmdbId] = obj.externalIds.tmdb
+                it[traktId] = obj.externalIds.trakt
+                it[tvdbId] = obj.externalIds.tvdb
+            }
         }
     }
 
     override fun delete(key: String) {
         transaction(dbConnection) {
+            ExternalIdsTable.deleteWhere { ExternalIdsTable.imdbId eq key }
             ShowTable.deleteWhere { ShowTable.id eq key }
         }
     }
@@ -111,7 +132,17 @@ class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
                 sinopsis = data[ShowTable.sinopsis],
                 imgPoster = data[ShowTable.imgPoster],
                 imgBackground = data[ShowTable.imgBackground],
-                path = data[ShowTable.path]
+                path = data[ShowTable.path],
+                externalIds = toExternalIds(data)
+        )
+    }
+
+    private fun toExternalIds(data: ResultRow): ExternalIds {
+        return ExternalIds(
+                imdb = data[ExternalIdsTable.imdbId],
+                trakt = data[ExternalIdsTable.traktId],
+                tmdb = data[ExternalIdsTable.tmdbId],
+                tvdb = data[ExternalIdsTable.tvdbId]
         )
     }
 }

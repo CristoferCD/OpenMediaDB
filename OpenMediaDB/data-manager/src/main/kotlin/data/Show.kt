@@ -6,5 +6,6 @@ data class Show (
         var sinopsis: String,
         var imgPoster: String? = null,
         var imgBackground: String? = null,
-        var path: String
+        var path: String,
+        var externalIds: ExternalIds
 )

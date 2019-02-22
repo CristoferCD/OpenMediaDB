@@ -10,17 +10,16 @@ class FileInfoDao(override val dbConnection: Database) : IBaseDao<FileInfo, Int>
     override fun get(key: Int): FileInfo? {
         var fileInfo: FileInfo? = null
         transaction(dbConnection) {
-            FileInfoTable.select { FileInfoTable.id eq key }
-                    .first().let { fileInfo = toFileInfo(it) }
+            fileInfo = FileInfoTable.select { FileInfoTable.id eq key }
+                    .limit(1).firstOrNull()?.toDataClass()
         }
         return fileInfo
     }
 
     override fun getAll(): List<FileInfo> {
-        val files = mutableListOf<FileInfo>()
+        var files = listOf<FileInfo>()
         transaction(dbConnection) {
-            FileInfoTable.selectAll()
-                    .forEach { files.add(toFileInfo(it)) }
+            files = FileInfoTable.selectAll().toDataClass()
         }
         return files
     }
@@ -55,14 +54,15 @@ class FileInfoDao(override val dbConnection: Database) : IBaseDao<FileInfo, Int>
         }
     }
 
-    private fun toFileInfo(data: ResultRow): FileInfo {
-        return FileInfo(
-                id = data[FileInfoTable.id].value,
-                path = Path.of(data[FileInfoTable.uri]),
-                duration = data[FileInfoTable.duration],
-                resolution = data[FileInfoTable.resolution],
-                bitrate = data[FileInfoTable.bitrate],
-                codec = data[FileInfoTable.codec]
-        )
-    }
+    private fun ResultRow.toDataClass() = FileInfo(
+            id = this[FileInfoTable.id].value,
+            path = Path.of(this[FileInfoTable.uri]),
+            duration = this[FileInfoTable.duration],
+            resolution = this[FileInfoTable.resolution],
+            bitrate = this[FileInfoTable.bitrate],
+            codec = this[FileInfoTable.codec]
+    )
+
+    private fun Iterable<ResultRow>.toDataClass() = map { it.toDataClass() }
+
 }

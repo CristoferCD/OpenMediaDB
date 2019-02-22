@@ -27,7 +27,7 @@ object DataManagerFactory {
         TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
         transaction {
             SchemaUtils.create(ShowTable, FileInfoTable, FollowingTable, NotificationTable,
-                    SeenTable, SessionTable, UserTable, VideoTable)
+                    SeenTable, SessionTable, UserTable, VideoTable, ExternalIdsTable)
         }
         return db
     }

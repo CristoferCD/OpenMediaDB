@@ -1,7 +1,9 @@
 package dao
 
+import data.ExternalIds
 import data.Video
 import data.tables.*
+import data.tables.VideoTable.fileId
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -9,8 +11,11 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
     override fun get(key: Int): Video? {
         var video: Video? = null
         transaction(dbConnection) {
-            VideoTable.select { VideoTable.id eq key }
-                    .first().let { video = toVideo(it) }
+            (VideoTable innerJoin ExternalIdsTable)
+                    .select { VideoTable.id eq key }
+                    .limit(1).firstOrNull()?.let {
+                        video = toVideo(it)
+                    }
         }
         return video
     }
@@ -18,7 +23,8 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
     fun get(imdbId: String): Video? {
         var video: Video? = null
         transaction(dbConnection) {
-            VideoTable.select { VideoTable.imdbId eq imdbId }
+            (VideoTable innerJoin ExternalIdsTable)
+                    .select { VideoTable.imdbId eq imdbId }
                     .first().let { video = toVideo(it) }
         }
         return video
@@ -27,7 +33,7 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
     override fun getAll(): List<Video> {
         val videos = mutableListOf<Video>()
         transaction(dbConnection) {
-            VideoTable.selectAll()
+            (VideoTable innerJoin ExternalIdsTable).selectAll()
                     .forEach { videos.add(toVideo(it)) }
         }
         return videos
@@ -35,21 +41,30 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
 
     override fun insert(obj: Video): Int {
         return transaction(dbConnection) {
+            val extId =ExternalIdsTable.insertAndGetId {
+                it[imdbId] = obj.imdbId
+                it[tmdbId] = obj.externalIds.tmdb
+                it[traktId] = obj.externalIds.trakt
+                it[tvdbId] = obj.externalIds.tvdb
+            }
             VideoTable.insertAndGetId {
-                it[showId] = ShowTable.select { ShowTable.id eq obj.showId }.first()[ShowTable.id]
+                it[showId] = ShowTable.select { ShowTable.id eq obj.showId }.limit(1).first()[ShowTable.id]
                 it[imdbId] = obj.imdbId
                 it[name] = obj.name
                 it[season] = obj.season
                 it[episodeNumber] = obj.episodeNumber
                 it[sinopsis] = obj.sinopsis
                 it[imgPoster] = obj.imgPoster
+                it[externalIds] = extId
             }.value
         }
     }
 
     override fun update(obj: Video) {
         transaction(dbConnection) {
-            VideoTable.update({ VideoTable.id eq obj.id }) {
+            var toUpdate = VideoTable.slice(VideoTable.id, ExternalIdsTable.id)
+                        .select {VideoTable.id eq obj.id}.limit(1).first()
+            VideoTable.update({ VideoTable.id eq toUpdate[VideoTable.id] }) {
                 it[fileId] = FileInfoTable.select { FileInfoTable.id eq obj.fileId }.first()[id]
                 it[imdbId] = obj.imdbId
                 it[name] = obj.name
@@ -57,6 +72,12 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
                 it[episodeNumber] = obj.episodeNumber
                 it[sinopsis] = obj.sinopsis
                 it[imgPoster] = obj.imgPoster
+            }
+            ExternalIdsTable.update({ ExternalIdsTable.id eq toUpdate[ExternalIdsTable.id] }) {
+                it[imdbId] = obj.externalIds.imdb
+                it[tmdbId] = obj.externalIds.tmdb
+                it[traktId] = obj.externalIds.trakt
+                it[tvdbId] = obj.externalIds.tvdb
             }
         }
     }
@@ -102,17 +123,27 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
         return found
     }
 
-    private fun toVideo(resultRow: ResultRow): Video {
+    private fun toVideo(data: ResultRow): Video {
         return Video(
-                id = resultRow[VideoTable.id].value,
-                fileId = resultRow[VideoTable.fileId]?.value,
-                showId = resultRow[VideoTable.showId].value,
-                imdbId = resultRow[VideoTable.imdbId],
-                name = resultRow[VideoTable.name],
-                season = resultRow[VideoTable.season],
-                episodeNumber = resultRow[VideoTable.episodeNumber],
-                sinopsis = resultRow[VideoTable.sinopsis],
-                imgPoster = resultRow[VideoTable.imgPoster]
+                id = data[VideoTable.id].value,
+                fileId = data[VideoTable.fileId]?.value,
+                showId = data[VideoTable.showId].value,
+                imdbId = data[VideoTable.imdbId],
+                name = data[VideoTable.name],
+                season = data[VideoTable.season],
+                episodeNumber = data[VideoTable.episodeNumber],
+                sinopsis = data[VideoTable.sinopsis],
+                imgPoster = data[VideoTable.imgPoster],
+                externalIds = toExternalIds(data)
+        )
+    }
+
+    private fun toExternalIds(data: ResultRow): ExternalIds {
+        return ExternalIds(
+                imdb = data[ExternalIdsTable.imdbId],
+                trakt = data[ExternalIdsTable.traktId],
+                tmdb = data[ExternalIdsTable.tmdbId],
+                tvdb = data[ExternalIdsTable.tvdbId]
         )
     }
 

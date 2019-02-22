@@ -2,7 +2,7 @@ package data.tables
 
 import org.jetbrains.exposed.dao.IntIdTable
 
-internal object FileInfoTable: IntIdTable("FileInfo") {
+internal object FileInfoTable : IntIdTable("FileInfo") {
     val uri = text("path")
     val duration = integer("duration").nullable()
     val resolution = varchar("resolution", 20)

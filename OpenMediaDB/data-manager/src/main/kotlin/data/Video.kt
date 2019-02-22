@@ -9,5 +9,6 @@ data class Video (
         var season: Int,
         var episodeNumber: Int,
         var sinopsis: String,
-        var imgPoster: String?
+        var imgPoster: String?,
+        var externalIds: ExternalIds
 )

@@ -2,6 +2,7 @@ package app.controller
 
 import DataManagerFactory
 import app.library.LibraryManager
+import data.ExternalIds
 import data.FileInfo
 import data.Show
 import data.Video
@@ -28,25 +29,7 @@ class FileController {
         val extension = file.originalFilename!!.substring(dotIdx + 1)
         try {
             val videoInfo = LibraryManager.fileCrawler.parseFileName(nameWithoutExtension)
-            val showLocally = DataManagerFactory.showDao.find(videoInfo.name)
-            var showId = ""
-            var tmdbShowId = 0
-            if (showLocally.isEmpty()) {
-                //TODO: build show path and build images path from tmdb
-                val foundShow = TMDbManager.apiAccess.search.searchTv(videoInfo.name, "en", 0).results?.firstOrNull()
-                        ?: TODO()
-                tmdbShowId = foundShow.id
-                val tmdbShow = TMDbManager.apiAccess.tvSeries.getSeries(foundShow.id, "en", TmdbTV.TvMethod.external_ids)
-                val showPath = LibraryManager.fileCrawler.libraryRoot + "\\" + tmdbShow.name
-                showId = DataManagerFactory.showDao.insert(Show(
-                        imdbId = tmdbShow.externalIds.imdbId,
-                        name = tmdbShow.originalName ?: tmdbShow.name,
-                        sinopsis = tmdbShow.overview,
-                        imgPoster = tmdbShow.posterPath,
-                        imgBackground = tmdbShow.backdropPath,
-                        path = showPath
-                ))
-            }
+            val show = LibraryManager.getOrCreateShow(videoInfo.name)
             //TODO; extension
             val path = LibraryManager.fileCrawler.importData(videoInfo, extension, file.bytes)
             val fileId = DataManagerFactory.fileInfoDao.insert(FileInfo(
@@ -57,20 +40,23 @@ class FileController {
                     duration = null,
                     path = path
             ))
-            val videoLocally = DataManagerFactory.videoDao.findFromParent(showId, videoInfo.season.toInt(), videoInfo.episode.toInt())
+            val videoLocally = DataManagerFactory.videoDao.findFromParent(show.imdbId, videoInfo.season.toInt(), videoInfo.episode.toInt())
             if (videoLocally.isEmpty()) {
-                val tmdbEpisode = TMDbManager.apiAccess.tvEpisodes.getEpisode(tmdbShowId,
+                val tmdbEpisode = TMDbManager.apiAccess.tvEpisodes.getEpisode(show.externalIds.tmdb!!,
                         videoInfo.season.toInt(), videoInfo.episode.toInt(), "en", TmdbTvEpisodes.EpisodeMethod.external_ids)
                 DataManagerFactory.videoDao.insert(Video(
                         id = null,
-                        showId = showId,
+                        showId = show.imdbId,
                         imdbId = tmdbEpisode.externalIds.imdbId,
                         sinopsis = tmdbEpisode.overview,
                         name = tmdbEpisode.name,
                         episodeNumber = tmdbEpisode.episodeNumber,
                         season = tmdbEpisode.seasonNumber,
                         imgPoster = null,
-                        fileId = fileId
+                        fileId = fileId,
+                        externalIds = ExternalIds(imdb = tmdbEpisode.externalIds?.imdbId,
+                                tvdb = tmdbEpisode.externalIds?.tvdbId?.toInt(),
+                                tmdb = tmdbEpisode.id)
                 ))
             } else {
                 val local = videoLocally.first()
