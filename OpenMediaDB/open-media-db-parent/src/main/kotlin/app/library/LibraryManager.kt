@@ -3,7 +3,6 @@ package app.library
 import DataManagerFactory
 import FileCrawler
 import data.Show
-import data.VideoFileInfo
 import data.tmdb.TMDbManager
 
 internal object LibraryManager {

@@ -44,16 +44,7 @@ class ShowController {
         TODO("Delete show and files if requested")
     }
 
-    @GetMapping("/all")
-    fun getAllLocal(): List<String> {
-        val returnList = mutableListOf<String>()
-        DataManagerFactory.showDao.getAll().forEach {
-            returnList.add("${it.imdbId} - ${it.name}")
-        }
-        return returnList
-    }
-
-    @GetMapping("/searchOnlein")
+    @GetMapping("/searchOnline")
     fun searchOnline(@RequestParam name: String): List<String> {
         val returnList = mutableListOf<String>()
         val api = TMDbBuilder().create()

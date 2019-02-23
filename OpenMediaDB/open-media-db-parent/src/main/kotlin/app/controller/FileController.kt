@@ -4,21 +4,22 @@ import DataManagerFactory
 import app.library.LibraryManager
 import data.ExternalIds
 import data.FileInfo
-import data.Show
 import data.Video
 import data.tmdb.TMDbManager
 import exceptions.FileParseException
-import info.movito.themoviedbapi.TmdbTV
 import info.movito.themoviedbapi.TmdbTvEpisodes
+import org.springframework.core.io.FileSystemResource
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/files")
 class FileController {
-    @GetMapping("/{id}")
-    fun getFile(@PathVariable id: Int) {
-        TODO()
+    @GetMapping("/{id}", produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
+    fun getFile(@PathVariable id: Int): FileSystemResource {
+        val file = DataManagerFactory.fileInfoDao.get(id)!!
+        return FileSystemResource(file.path)
     }
 
     @PostMapping
@@ -30,7 +31,6 @@ class FileController {
         try {
             val videoInfo = LibraryManager.fileCrawler.parseFileName(nameWithoutExtension)
             val show = LibraryManager.getOrCreateShow(videoInfo.name)
-            //TODO; extension
             val path = LibraryManager.fileCrawler.importData(videoInfo, extension, file.bytes)
             val fileId = DataManagerFactory.fileInfoDao.insert(FileInfo(
                     id = null,
@@ -72,6 +72,6 @@ class FileController {
 
     @DeleteMapping("/{id}")
     fun deleteFile(@PathVariable id: Int) {
-        TODO()
+        DataManagerFactory.fileInfoDao.delete(id)
     }
 }

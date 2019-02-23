@@ -3,7 +3,8 @@ package dao
 import data.ExternalIds
 import data.Video
 import data.tables.*
-import data.tables.VideoTable.fileId
+import exceptions.ExistingEntityException
+import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -25,7 +26,7 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
         transaction(dbConnection) {
             (VideoTable innerJoin ExternalIdsTable)
                     .select { VideoTable.imdbId eq imdbId }
-                    .first().let { video = toVideo(it) }
+                    .firstOrNull()?.let { video = toVideo(it) }
         }
         return video
     }
@@ -40,30 +41,39 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
     }
 
     override fun insert(obj: Video): Int {
-        return transaction(dbConnection) {
-            val extId =ExternalIdsTable.insertAndGetId {
-                it[imdbId] = obj.imdbId
-                it[tmdbId] = obj.externalIds.tmdb
-                it[traktId] = obj.externalIds.trakt
-                it[tvdbId] = obj.externalIds.tvdb
+        var videoId = 0
+        try {
+            transaction(dbConnection) {
+                val extId = ExternalIdsTable.insertAndGetId {
+                    it[imdbId] = obj.imdbId
+                    it[tmdbId] = obj.externalIds.tmdb
+                    it[traktId] = obj.externalIds.trakt
+                    it[tvdbId] = obj.externalIds.tvdb
+                }
+                videoId = VideoTable.insertAndGetId {
+                    it[showId] = ShowTable.select { ShowTable.id eq obj.showId }.limit(1).first()[ShowTable.id]
+                    it[imdbId] = obj.imdbId
+                    it[fileId] = FileInfoTable.select { FileInfoTable.id eq obj.fileId }.limit(1).first()[FileInfoTable.id]
+                    it[name] = obj.name
+                    it[season] = obj.season
+                    it[episodeNumber] = obj.episodeNumber
+                    it[sinopsis] = obj.sinopsis
+                    it[imgPoster] = obj.imgPoster
+                    it[externalIds] = extId
+                }.value
             }
-            VideoTable.insertAndGetId {
-                it[showId] = ShowTable.select { ShowTable.id eq obj.showId }.limit(1).first()[ShowTable.id]
-                it[imdbId] = obj.imdbId
-                it[name] = obj.name
-                it[season] = obj.season
-                it[episodeNumber] = obj.episodeNumber
-                it[sinopsis] = obj.sinopsis
-                it[imgPoster] = obj.imgPoster
-                it[externalIds] = extId
-            }.value
+        } catch (e: ExposedSQLException) {
+            if (e.toString().contains(Regex("[SQLITE_CONSTRAINT].*UNIQUE")))
+                throw ExistingEntityException("VideoTable", videoId.toString(), e)
+            else throw e
         }
+        return videoId
     }
 
     override fun update(obj: Video) {
         transaction(dbConnection) {
-            var toUpdate = VideoTable.slice(VideoTable.id, ExternalIdsTable.id)
-                        .select {VideoTable.id eq obj.id}.limit(1).first()
+            val toUpdate = VideoTable.slice(VideoTable.id, ExternalIdsTable.id)
+                    .select { VideoTable.id eq obj.id }.limit(1).first()
             VideoTable.update({ VideoTable.id eq toUpdate[VideoTable.id] }) {
                 it[fileId] = FileInfoTable.select { FileInfoTable.id eq obj.fileId }.first()[id]
                 it[imdbId] = obj.imdbId
