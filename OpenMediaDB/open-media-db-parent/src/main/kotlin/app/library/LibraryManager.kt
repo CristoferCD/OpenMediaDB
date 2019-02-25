@@ -4,6 +4,7 @@ import DataManagerFactory
 import FileCrawler
 import data.Show
 import data.tmdb.TMDbManager
+import exceptions.ExistingEntityException
 
 internal object LibraryManager {
     val fileCrawler by lazy { FileCrawler() }
@@ -15,6 +16,15 @@ internal object LibraryManager {
                     createShowEntry(show)
                     return show
                 }
+    }
+
+    fun createOrUpdateShow(show: Show) {
+        show.path = fileCrawler.libraryRoot + "\\" + show.name
+        try {
+            DataManagerFactory.showDao.insert(show)
+        } catch(e: ExistingEntityException) {
+            DataManagerFactory.showDao.update(show)
+        }
     }
 
     private fun createShowEntry(show: Show) {

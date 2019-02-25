@@ -119,7 +119,7 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
     fun findFromParent(showId: String, season: Int? = null, episode: Int? = null): List<Video> {
         val found = mutableListOf<Video>()
         transaction(dbConnection) {
-            val query = VideoTable.select { VideoTable.showId eq showId }
+            val query = (VideoTable innerJoin ExternalIdsTable).select { VideoTable.showId eq showId }
             season?.let {
                 query.andWhere { VideoTable.season eq season }
             }

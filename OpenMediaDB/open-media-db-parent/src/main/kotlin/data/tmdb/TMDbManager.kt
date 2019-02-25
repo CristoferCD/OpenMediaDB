@@ -2,6 +2,7 @@ package data.tmdb
 
 import data.ExternalIds
 import data.Show
+import info.movito.themoviedbapi.TmdbFind
 import info.movito.themoviedbapi.TmdbMovies
 import info.movito.themoviedbapi.TmdbTV
 import info.movito.themoviedbapi.model.MovieDb
@@ -11,6 +12,14 @@ object TMDbManager {
     val apiAccess by lazy {
         tmdbApi {
             defaultLanguage("en")
+        }
+    }
+
+    fun find(imdbId: String): Show? {
+        apiAccess.find.find(imdbId, TmdbFind.ExternalSource.imdb_id, "en").let {
+            return it.tvResults?.firstOrNull()?.let { getTVShow(it)} ?: run {
+                it.movieResults?.firstOrNull()?.let { getMovie(it) }
+            }
         }
     }
 
@@ -29,7 +38,7 @@ object TMDbManager {
         val item = apiAccess.tvSeries.getSeries(tvShow.id, "en", TmdbTV.TvMethod.external_ids)
         return Show(
                 imdbId = item.externalIds.imdbId,
-                name = item.originalName ?: item.name,
+                name = item.name ?: item.originalName,
                 sinopsis = item.overview,
                 imgPoster = item.posterPath,
                 imgBackground = item.backdropPath,

@@ -1,28 +1,42 @@
 package app.controller
 
 import DataManagerFactory
+import app.library.LibraryManager
 import data.Show
 import data.request.BooleanActionRB
 import data.tmdb.TMDbBuilder
+import data.tmdb.TMDbManager
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/shows")
 class ShowController {
 
+    @PostMapping
+    fun registerShow(@RequestParam imdbId: String): String {
+        val show = TMDbManager.find(imdbId)
+        println("Requested creation of $show")
+        return if (show != null) {
+            LibraryManager.createOrUpdateShow(show)
+            "Successfully created show [${show.imdbId}] - ${show.name}"
+        } else {
+            "Unable to find show with id $imdbId"
+        }
+    }
+
     @GetMapping
-    fun getList() : List<Show> {
+    fun getList(): List<Show> {
         return DataManagerFactory.showDao.getAll()
     }
 
     @GetMapping("/following")
-    fun getFollowing() : List<Show> {
+    fun getFollowing(): List<Show> {
         val authenticatedUser = 1
         return DataManagerFactory.showDao.listFollowing(authenticatedUser)
     }
 
     @PostMapping("/following")
-    fun doFollow(@RequestBody booleanAction: BooleanActionRB) : Boolean {
+    fun doFollow(@RequestBody booleanAction: BooleanActionRB): Boolean {
         val authenticatedUser = 1
         DataManagerFactory.showDao.follow(booleanAction.actionValue, booleanAction.showId, authenticatedUser)
         //TODO: check
