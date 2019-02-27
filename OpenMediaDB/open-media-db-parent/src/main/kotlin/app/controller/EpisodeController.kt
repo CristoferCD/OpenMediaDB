@@ -12,7 +12,9 @@ import org.springframework.web.server.ResponseStatusException
 class EpisodeController {
 
     @GetMapping
-    fun findEpisode(@RequestParam("show") showId: String, @RequestParam season: Int, @RequestParam(required = false) episode: Int?): List<Video> {
+    fun findEpisode(@RequestParam("show") showId: String,
+                    @RequestParam(required = false) season: Int,
+                    @RequestParam(required = false) episode: Int?): List<Video> {
         return DataManagerFactory.videoDao.findFromParent(showId, season, episode);
     }
 

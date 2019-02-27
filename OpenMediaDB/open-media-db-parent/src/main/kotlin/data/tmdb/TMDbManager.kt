@@ -15,6 +15,8 @@ object TMDbManager {
         }
     }
 
+    val tmdbConfig by lazy { apiAccess.configuration ?: TODO("Init exception")}
+
     fun find(imdbId: String): Show? {
         apiAccess.find.find(imdbId, TmdbFind.ExternalSource.imdb_id, "en").let {
             return it.tvResults?.firstOrNull()?.let { getTVShow(it)} ?: run {
@@ -40,8 +42,8 @@ object TMDbManager {
                 imdbId = item.externalIds.imdbId,
                 name = item.name ?: item.originalName,
                 sinopsis = item.overview,
-                imgPoster = item.posterPath,
-                imgBackground = item.backdropPath,
+                imgPoster = tmdbConfig.baseUrl + tmdbConfig.posterSizes?.last() + item.posterPath,
+                imgBackground = tmdbConfig.baseUrl + tmdbConfig.backdropSizes?.last() + item.backdropPath,
                 path = "",
                 externalIds = ExternalIds(imdb = item.externalIds?.imdbId,
                         tmdb = item.id,
@@ -55,8 +57,8 @@ object TMDbManager {
                 imdbId = item.imdbID,
                 name = item.originalTitle ?: item.title,
                 sinopsis = item.overview,
-                imgPoster = item.posterPath,
-                imgBackground = item.backdropPath,
+                imgPoster = tmdbConfig.baseUrl + tmdbConfig.posterSizes?.last() + item.posterPath,
+                imgBackground = tmdbConfig.baseUrl + tmdbConfig.backdropSizes?.last() + item.backdropPath,
                 path = "",
                 externalIds = ExternalIds(imdb = item.imdbID,
                         tmdb = item.id)
