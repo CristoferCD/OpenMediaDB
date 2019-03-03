@@ -20,7 +20,7 @@ class VideoDaoTest {
                     externalIds = ExternalIds()
             ))
         } catch (e: ExistingEntityException) {
-            println("Test show already exists")
+            println("Test show already exists ${e.message}")
         }
         try {
             DataManagerFactory.videoDao.insert(Video(
@@ -36,7 +36,7 @@ class VideoDaoTest {
                     externalIds = ExternalIds()
             ))
         } catch (e: ExistingEntityException) {
-            println("Test video already exists")
+            println("Test video already exists ${e.message}")
         }
         val video = DataManagerFactory.videoDao.get("tt2178788")
         assert(video!!.imdbId == "tt2178788")

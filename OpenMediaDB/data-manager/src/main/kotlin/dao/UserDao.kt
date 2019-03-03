@@ -2,6 +2,8 @@ package dao
 
 import data.User
 import data.tables.UserTable
+import exceptions.ExistingEntityException
+import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -25,12 +27,20 @@ class UserDao(override val dbConnection: Database) : IBaseDao<User, Int> {
     }
 
     override fun insert(obj: User): Int {
-        return transaction(dbConnection) {
-            UserTable.insertAndGetId {
-                it[name] = obj.name
-                it[password] = obj.password
+        var id = 0
+        try {
+            transaction(dbConnection) {
+                id = UserTable.insertAndGetId {
+                    it[name] = obj.name
+                    it[password] = obj.password
+                }.value
             }
-        }.value
+        } catch (e: ExposedSQLException) {
+            if (e.toString().contains(Regex("\\[SQLITE_CONSTRAINT\\].*UNIQUE")))
+                throw ExistingEntityException("UserTable", obj.name, e)
+            else throw e
+        }
+        return id
     }
 
     override fun update(obj: User) {

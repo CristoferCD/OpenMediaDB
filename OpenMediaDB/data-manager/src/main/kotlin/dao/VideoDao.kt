@@ -63,7 +63,7 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
                 }.value
             }
         } catch (e: ExposedSQLException) {
-            if (e.toString().contains(Regex("[SQLITE_CONSTRAINT].*UNIQUE")))
+            if (e.toString().contains(Regex("\\[SQLITE_CONSTRAINT\\].*UNIQUE")))
                 throw ExistingEntityException("VideoTable", videoId.toString(), e)
             else throw e
         }

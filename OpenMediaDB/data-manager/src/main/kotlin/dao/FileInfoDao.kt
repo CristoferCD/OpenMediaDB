@@ -2,6 +2,8 @@ package dao
 
 import data.FileInfo
 import data.tables.FileInfoTable
+import exceptions.ExistingEntityException
+import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.nio.file.Path
@@ -25,15 +27,23 @@ class FileInfoDao(override val dbConnection: Database) : IBaseDao<FileInfo, Int>
     }
 
     override fun insert(obj: FileInfo): Int {
-        return transaction(dbConnection) {
-            FileInfoTable.insertAndGetId {
-                it[uri] = obj.path.toString()
-                it[duration] = obj.duration
-                it[resolution] = obj.resolution
-                it[bitrate] = obj.bitrate
-                it[codec] = obj.codec
-            }.value
+        var id = 0
+        try {
+            transaction(dbConnection) {
+                id = FileInfoTable.insertAndGetId {
+                    it[uri] = obj.path.toString()
+                    it[duration] = obj.duration
+                    it[resolution] = obj.resolution
+                    it[bitrate] = obj.bitrate
+                    it[codec] = obj.codec
+                }.value
+            }
+        } catch (e: ExposedSQLException) {
+            if (e.toString().contains(Regex("\\[SQLITE_CONSTRAINT\\].*UNIQUE")))
+                throw ExistingEntityException("FileInfoTable", obj.path.toString(), e)
+            else throw e
         }
+        return id
     }
 
     override fun update(obj: FileInfo) {

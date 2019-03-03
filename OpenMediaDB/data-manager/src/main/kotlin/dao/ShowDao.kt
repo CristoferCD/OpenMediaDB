@@ -57,7 +57,7 @@ class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
                 }
             }
         } catch (e: ExposedSQLException) {
-            if (e.toString().contains(Regex("[SQLITE_CONSTRAINT].*UNIQUE")))
+            if (e.toString().contains(Regex("\\[SQLITE_CONSTRAINT\\].*UNIQUE")))
                 throw ExistingEntityException("ShowTable", obj.imdbId, e)
             else throw e
         }
