@@ -53,7 +53,9 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
                 videoId = VideoTable.insertAndGetId {
                     it[showId] = ShowTable.select { ShowTable.id eq obj.showId }.limit(1).first()[ShowTable.id]
                     it[imdbId] = obj.imdbId
-                    it[fileId] = FileInfoTable.select { FileInfoTable.id eq obj.fileId }.limit(1).first()[FileInfoTable.id]
+                    it[fileId] = if (obj.fileId != null)
+                        FileInfoTable.select { FileInfoTable.id eq obj.fileId }.limit(1).first()[FileInfoTable.id]
+                        else null
                     it[name] = obj.name
                     it[season] = obj.season
                     it[episodeNumber] = obj.episodeNumber
