@@ -4,6 +4,7 @@ import DataManagerFactory
 import data.Video
 import data.request.BooleanActionRB
 import org.springframework.http.HttpStatus
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 
@@ -26,6 +27,8 @@ class EpisodeController {
 
     @PostMapping("/{id}/seen")
     fun markSeen(@PathVariable id: String, @RequestBody booleanAction: BooleanActionRB): Boolean {
-        TODO("Must implement user auth first")
+        val user = DataManagerFactory.userDao.findByName(SecurityContextHolder.getContext().authentication.name)
+        DataManagerFactory.videoDao.markWatched(booleanAction.actionValue, user!!.id!!, id.toInt())
+        return booleanAction.actionValue
     }
 }

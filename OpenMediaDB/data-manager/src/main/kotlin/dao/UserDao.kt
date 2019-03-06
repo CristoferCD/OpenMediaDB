@@ -17,6 +17,15 @@ class UserDao(override val dbConnection: Database) : IBaseDao<User, Int> {
         return user
     }
 
+    fun findByName(name: String): User? {
+        var user: User? = null
+        transaction(dbConnection) {
+            UserTable.select { UserTable.name eq name }
+                    .firstOrNull()?.let { user = toUser(it) }
+        }
+        return user
+    }
+
     override fun getAll(): List<User> {
         val userList = mutableListOf<User>()
         transaction(dbConnection) {
@@ -62,7 +71,7 @@ class UserDao(override val dbConnection: Database) : IBaseDao<User, Int> {
         return User(
                 id = data[UserTable.id].value,
                 name = data[UserTable.name],
-                password = ""
+                password = data[UserTable.password]
         )
     }
 }

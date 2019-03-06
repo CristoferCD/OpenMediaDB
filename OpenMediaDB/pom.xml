@@ -99,6 +99,12 @@
             <artifactId>jackson-module-kotlin</artifactId>
             <version>${jackson.version}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.auth0/java-jwt -->
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>${jwt.version}</version>
+        </dependency>
 
     </dependencies>
 
@@ -169,6 +175,7 @@
         <sqlite.version>3.25.2</sqlite.version>
         <tmdbapi.version>1.9</tmdbapi.version>
         <jackson.version>2.9.8</jackson.version>
+        <jwt.version>3.7.0</jwt.version>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
     </properties>
 

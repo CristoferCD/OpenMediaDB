@@ -6,6 +6,7 @@ import data.Show
 import data.request.BooleanActionRB
 import data.tmdb.TMDbBuilder
 import data.tmdb.TMDbManager
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -31,8 +32,8 @@ class ShowController {
 
     @GetMapping("/following")
     fun getFollowing(): List<Show> {
-        val authenticatedUser = 1
-        return DataManagerFactory.showDao.listFollowing(authenticatedUser)
+        val user = DataManagerFactory.userDao.findByName(SecurityContextHolder.getContext().authentication.name)
+        return DataManagerFactory.showDao.listFollowing(user?.id!!)
     }
 
     @PostMapping("/following")
