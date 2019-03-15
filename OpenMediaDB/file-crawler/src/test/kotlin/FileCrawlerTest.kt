@@ -18,6 +18,7 @@ internal class FileCrawlerTest {
         val file = File.createTempFile("KonoSuba - God's Blessing on This Wonderful World! 2x01", ".mp4")
         val crawler = FileCrawler()
         println(crawler.parseFileInfo(file))
+        file.delete()
     }
 
     @Test

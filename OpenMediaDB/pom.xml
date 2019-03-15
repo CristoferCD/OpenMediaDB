@@ -105,7 +105,24 @@
             <artifactId>java-jwt</artifactId>
             <version>${jwt.version}</version>
         </dependency>
-
+        <!-- https://mvnrepository.com/artifact/io.github.microutils/kotlin-logging -->
+        <dependency>
+            <groupId>io.github.microutils</groupId>
+            <artifactId>kotlin-logging</artifactId>
+            <version>${logging.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intuit.karate</groupId>
+            <artifactId>karate-apache</artifactId>
+            <version>${karate.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.intuit.karate</groupId>
+            <artifactId>karate-junit4</artifactId>
+            <version>${karate.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -176,6 +193,8 @@
         <tmdbapi.version>1.9</tmdbapi.version>
         <jackson.version>2.9.8</jackson.version>
         <jwt.version>3.7.0</jwt.version>
+        <logging.version>1.6.25</logging.version>
+        <karate.version>0.9.1</karate.version>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
     </properties>
 

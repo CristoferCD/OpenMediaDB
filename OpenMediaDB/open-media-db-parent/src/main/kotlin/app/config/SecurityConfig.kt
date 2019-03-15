@@ -28,7 +28,7 @@ open class SecurityConfig(private val userAuthService: UserAuthService) : WebSec
     override fun configure(http: HttpSecurity?) {
 //        super.configure(http)
         http!!.cors().and().csrf().disable().authorizeRequests()
-                .antMatchers(HttpMethod.POST, "/login", "/users/signup").permitAll()
+                .antMatchers(HttpMethod.POST, "/login", "/signup").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(JWTAuthenticationFilter(authenticationManager()))

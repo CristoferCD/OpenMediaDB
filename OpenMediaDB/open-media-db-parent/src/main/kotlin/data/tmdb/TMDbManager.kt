@@ -2,6 +2,7 @@ package data.tmdb
 
 import data.ExternalIds
 import data.Show
+import data.request.SearchRB
 import info.movito.themoviedbapi.TmdbFind
 import info.movito.themoviedbapi.TmdbMovies
 import info.movito.themoviedbapi.TmdbTV
@@ -25,6 +26,23 @@ object TMDbManager {
         }
     }
 
+    fun search(query: String, page: Int = 0): SearchRB {
+        val searchResult = apiAccess.search.searchMulti(query, "en", page)
+        val showList = searchResult.results.mapNotNull {
+            when (it) {
+                is TvSeries -> getTVShow(it)
+                is MovieDb -> getMovie(it)
+                else -> null
+            }
+        }
+        return SearchRB(
+                showList,
+                searchResult.totalResults,
+                page,
+                searchResult.totalPages
+        )
+    }
+
     fun findByName(name: String): Show? {
         apiAccess.search.searchMulti(name, "en", 0).results?.firstOrNull()?.let {
             return when (it) {
@@ -36,8 +54,9 @@ object TMDbManager {
         return null
     }
 
-    private fun getTVShow(tvShow: TvSeries): Show {
+    private fun getTVShow(tvShow: TvSeries): Show? {
         val item = apiAccess.tvSeries.getSeries(tvShow.id, "en", TmdbTV.TvMethod.external_ids)
+        if (item.externalIds.imdbId == null) return null
         return Show(
                 imdbId = item.externalIds.imdbId,
                 name = item.name ?: item.originalName,
@@ -51,8 +70,9 @@ object TMDbManager {
         )
     }
 
-    private fun getMovie(movie: MovieDb): Show {
+    private fun getMovie(movie: MovieDb): Show? {
         val item = apiAccess.movies.getMovie(movie.id, "en")
+        if (item.imdbID == null) return null
         return Show(
                 imdbId = item.imdbID,
                 name = item.originalTitle ?: item.title,

@@ -4,6 +4,7 @@ import DataManagerFactory
 import app.library.LibraryManager
 import data.Show
 import data.request.BooleanActionRB
+import data.request.SearchRB
 import data.tmdb.TMDbBuilder
 import data.tmdb.TMDbManager
 import org.springframework.security.core.context.SecurityContextHolder
@@ -44,8 +45,8 @@ class ShowController {
         return true
     }
 
-    @GetMapping("/search")
-    fun search(@RequestParam("q") query: String): List<Show> {
+    @GetMapping("/find")
+    fun find(@RequestParam("q") query: String): List<Show> {
         TODO("Implement fuzzy string search to all entries on db")
     }
 
@@ -59,20 +60,8 @@ class ShowController {
         TODO("Delete show and files if requested")
     }
 
-    @GetMapping("/searchOnline")
-    fun searchOnline(@RequestParam name: String): List<String> {
-        val returnList = mutableListOf<String>()
-        val api = TMDbBuilder().create()
-        api.search.searchTv(name, "en", 0).results?.let {
-            it.forEach {
-                returnList.add("${it.name} - ${it.overview} - ${it.userRating}")
-            }
-        }
-        api.search.searchMovie(name, null, "en", true, 0).results?.let {
-            it.forEach {
-                returnList.add("${it.title} - ${it.overview} - ${it.userRating}")
-            }
-        }
-        return returnList
+    @GetMapping("/search")
+    fun search(@RequestParam query: String, @RequestParam(required = false) page: Int?): SearchRB {
+        return if (page == null) TMDbManager.search(query) else TMDbManager.search(query, page)
     }
 }
