@@ -74,10 +74,8 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
 
     override fun update(obj: Video) {
         transaction(dbConnection) {
-            val toUpdate = VideoTable.slice(VideoTable.id, ExternalIdsTable.id)
-                    .select { VideoTable.id eq obj.id }.limit(1).first()
-            VideoTable.update({ VideoTable.id eq toUpdate[VideoTable.id] }) {
-                it[fileId] = FileInfoTable.select { FileInfoTable.id eq obj.fileId }.first()[id]
+            VideoTable.update({ VideoTable.id eq obj.id }) {
+                it[fileId] = FileInfoTable.select { FileInfoTable.id eq obj.fileId }.firstOrNull()?.get(FileInfoTable.id)
                 it[imdbId] = obj.imdbId
                 it[name] = obj.name
                 it[season] = obj.season
@@ -85,7 +83,7 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
                 it[sinopsis] = obj.sinopsis
                 it[imgPoster] = obj.imgPoster
             }
-            ExternalIdsTable.update({ ExternalIdsTable.id eq toUpdate[ExternalIdsTable.id] }) {
+            ExternalIdsTable.update({ ExternalIdsTable.id eq obj.externalIds.id }) {
                 it[imdbId] = obj.externalIds.imdb
                 it[tmdbId] = obj.externalIds.tmdb
                 it[traktId] = obj.externalIds.trakt
@@ -99,8 +97,8 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
             val existingEntry = SeenTable.select { (SeenTable.userId eq userId) and (SeenTable.videoId eq videoId) }.firstOrNull()
             if (existingEntry == null) {
                 SeenTable.insert {
-                    it[SeenTable.userId] = UserTable.select { UserTable.id eq userId }.first()[id]
-                    it[SeenTable.videoId] = VideoTable.select { VideoTable.id eq videoId }.first()[id]
+                    it[SeenTable.userId] = UserTable.select { UserTable.id eq userId }.first()[UserTable.id]
+                    it[SeenTable.videoId] = VideoTable.select { VideoTable.id eq videoId }.first()[VideoTable.id]
                     it[SeenTable.seen] = watched
                 }
             } else {
@@ -152,6 +150,7 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
 
     private fun toExternalIds(data: ResultRow): ExternalIds {
         return ExternalIds(
+                id = data[ExternalIdsTable.id].value,
                 imdb = data[ExternalIdsTable.imdbId],
                 trakt = data[ExternalIdsTable.traktId],
                 tmdb = data[ExternalIdsTable.tmdbId],

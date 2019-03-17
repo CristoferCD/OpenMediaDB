@@ -15,10 +15,17 @@ internal class FileCrawlerTest {
     @Test
     fun parserTest() {
 //        val file = File.createTempFile("KonoSuba 2x01", ".mp4")
-        val file = File.createTempFile("KonoSuba - God's Blessing on This Wonderful World! 2x01", ".mp4")
+        val file = File.createTempFile("KonoSuba - God's Blessing on This Wonderful World! 2x01 - Episode Name", ".mp4")
         val crawler = FileCrawler()
         println(crawler.parseFileInfo(file))
         file.delete()
+    }
+
+    @Test
+    fun replaceTest() {
+        var string = "name: something"
+        string = string.replace("[:/*\"?|<>] ?".toRegex(), " ")
+        assert(!string.contains(':'))
     }
 
     @Test

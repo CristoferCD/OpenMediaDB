@@ -2,11 +2,14 @@ package data.tmdb
 
 import data.ExternalIds
 import data.Show
+import data.Video
 import data.request.SearchRB
 import info.movito.themoviedbapi.TmdbFind
 import info.movito.themoviedbapi.TmdbMovies
 import info.movito.themoviedbapi.TmdbTV
+import info.movito.themoviedbapi.TmdbTvEpisodes
 import info.movito.themoviedbapi.model.MovieDb
+import info.movito.themoviedbapi.model.tv.TvEpisode
 import info.movito.themoviedbapi.model.tv.TvSeries
 
 object TMDbManager {
@@ -24,6 +27,30 @@ object TMDbManager {
                 it.movieResults?.firstOrNull()?.let { getMovie(it) }
             }
         }
+    }
+
+    fun getEpisode(tmdbParentId: Int, season: Int, episode: Int): Video? {
+        val episode = apiAccess.tvEpisodes.getEpisode(tmdbParentId, season, episode, "en",
+                TmdbTvEpisodes.EpisodeMethod.external_ids, TmdbTvEpisodes.EpisodeMethod.images)
+        val parent = apiAccess.tvSeries.getSeries(tmdbParentId, "en", TmdbTV.TvMethod.external_ids)
+        val image = episode.images.stills.firstOrNull()?.filePath
+        return Video(
+                id = null,
+                fileId = null,
+                showId = parent.externalIds.imdbId,
+                imdbId = episode.externalIds.imdbId,
+                name = episode.name,
+                season = episode.seasonNumber,
+                episodeNumber = episode.episodeNumber,
+                sinopsis = episode.overview,
+                imgPoster = tmdbConfig.baseUrl + tmdbConfig.posterSizes?.last() + image,
+                externalIds = ExternalIds(
+                        imdb = episode.externalIds.imdbId,
+                        tvdb = episode.externalIds.tvdbId?.toInt(),
+                        tmdb = episode.id
+                )
+
+        )
     }
 
     fun search(query: String, page: Int = 0): SearchRB {

@@ -11,14 +11,13 @@ import org.jetbrains.exposed.dao.EntityID
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.io.Externalizable
 
 class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
     override fun get(key: String): Show? {
         var show: Show? = null
         transaction(dbConnection) {
             (ShowTable innerJoin ExternalIdsTable)
-                    .select { ShowTable.id eq key }.limit(1)
+                    .select { ShowTable.id eq key }
                     .firstOrNull()?.let {
                         show = toShow(it)
                     }
@@ -40,7 +39,7 @@ class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
     override fun insert(obj: Show): String {
         try {
             transaction(dbConnection) {
-                val extId =ExternalIdsTable.insertAndGetId {
+                val extId = ExternalIdsTable.insertAndGetId {
                     it[imdbId] = obj.imdbId
                     it[tmdbId] = obj.externalIds.tmdb
                     it[traktId] = obj.externalIds.trakt
@@ -73,7 +72,7 @@ class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
                 it[imgBackground] = obj.imgBackground
                 it[path] = obj.path
             }
-            ExternalIdsTable.update({ ExternalIdsTable.imdbId eq obj.imdbId }) {
+            ExternalIdsTable.update({ ExternalIdsTable.id eq obj.externalIds.id }) {
                 it[tmdbId] = obj.externalIds.tmdb
                 it[traktId] = obj.externalIds.trakt
                 it[tvdbId] = obj.externalIds.tvdb
@@ -94,7 +93,7 @@ class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
             if (existingEntry == null) {
                 FollowingTable.insert {
                     it[FollowingTable.showId] = ShowTable.select { ShowTable.id eq showId }.first()[ShowTable.id]
-                    it[FollowingTable.userId] = UserTable.select { UserTable.id eq userId }.first()[id]
+                    it[FollowingTable.userId] = UserTable.select { UserTable.id eq userId }.first()[UserTable.id]
                     it[FollowingTable.following] = follow
                 }
             }
@@ -139,6 +138,7 @@ class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
 
     private fun toExternalIds(data: ResultRow): ExternalIds {
         return ExternalIds(
+                id = data[ExternalIdsTable.id].value,
                 imdb = data[ExternalIdsTable.imdbId],
                 trakt = data[ExternalIdsTable.traktId],
                 tmdb = data[ExternalIdsTable.tmdbId],

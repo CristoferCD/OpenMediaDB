@@ -17,7 +17,11 @@ class VideoDaoTest {
                     name = "Game of Thrones",
                     sinopsis = "Seven noble families fight for control of the mythical land of Westeros. Friction between the houses leads to full-scale war. All while a very ancient evil awakens in the farthest north. Amidst the war, a neglected military order of misfits, the Night's Watch, is all that stands between the realms of men and icy horrors beyond.",
                     path = "",
-                    externalIds = ExternalIds()
+                    externalIds = ExternalIds(
+                            id = null,
+                            imdb = "tt0944947",
+                            tmdb = 22983
+                    )
             ))
         } catch (e: ExistingEntityException) {
             println("Test show already exists ${e.message}")
@@ -33,12 +37,23 @@ class VideoDaoTest {
                     episodeNumber = 0,
                     sinopsis = "",
                     imgPoster = "",
-                    externalIds = ExternalIds()
+                    externalIds = ExternalIds(
+                            id = null,
+                            imdb = "tt2178788",
+                            trakt = 34
+                    )
             ))
         } catch (e: ExistingEntityException) {
             println("Test video already exists ${e.message}")
         }
         val video = DataManagerFactory.videoDao.get("tt2178788")
         assert(video!!.imdbId == "tt2178788")
+    }
+
+    @Test
+    fun update() {
+        val video = DataManagerFactory.videoDao.get(1)
+        video!!.fileId = 23
+        DataManagerFactory.videoDao.update(video)
     }
 }
