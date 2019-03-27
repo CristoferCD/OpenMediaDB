@@ -2,29 +2,39 @@ package app.controller
 
 import DataManagerFactory
 import app.library.LibraryManager
-import data.ExternalIds
 import data.FileInfo
-import data.Video
 import data.VideoFileInfo
-import data.tmdb.TMDbManager
-import exceptions.FileParseException
-import info.movito.themoviedbapi.TmdbTvEpisodes
+import data.VideoToken
 import mu.KotlinLogging
-import org.apache.tomcat.jni.Library
+import org.apache.tomcat.util.http.fileupload.FileUploadException
+import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload
 import org.springframework.core.io.FileSystemResource
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.server.ResponseStatusException
+import java.io.IOException
+import java.lang.StringBuilder
+import java.security.MessageDigest
+import java.time.ZonedDateTime
+import javax.servlet.http.HttpServletRequest
 
 @RestController
 @RequestMapping("/files")
 class FileController {
     private val log = KotlinLogging.logger{}
 
-    @GetMapping("/{id}", produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
-    fun getFile(@PathVariable id: Int): FileSystemResource {
+    @GetMapping("/{id}")
+    fun getFile(@PathVariable id: Int): String {
         val file = DataManagerFactory.fileInfoDao.get(id)!!
-        return FileSystemResource(file.path)
+        val token = VideoToken(
+                fileId = file.id!!,
+                token = file.path.toString().sha512Token(),
+                expires = ZonedDateTime.now().plusDays(1)
+        )
+        DataManagerFactory.tokenDao.insert(token)
+        return token.token
     }
 
     @PostMapping
@@ -40,7 +50,7 @@ class FileController {
                 episode = episodeInfo.episodeNumber.toString(),
                 episodeName = episodeInfo.name,
                 path = ""
-        ), extension, file.bytes)
+        ), extension, file.inputStream)
         val fileId = DataManagerFactory.fileInfoDao.insert(FileInfo(
                 id = null,
                 codec = "",
@@ -52,6 +62,29 @@ class FileController {
         episodeInfo.fileId = fileId
         DataManagerFactory.videoDao.update(episodeInfo)
     }
+
+//    @PostMapping
+//    fun uploadFile(req: HttpServletRequest) {
+//        try {
+//            if (!ServletFileUpload.isMultipartContent(req))
+//                throw ResponseStatusException(HttpStatus.METHOD_NOT_ALLOWED, "Must be a multipart request")
+//
+//            val showId = req.getParameter("showId")
+//            val season = req.getParameter("season")
+//            val episode = req.getParameter("episode")
+//            log.info { "Got parameters: [$showId] ${season}x$episode" }
+//            val iter = ServletFileUpload().getItemIterator(req)
+//            while(iter.hasNext()) {
+//                val item = iter.next()
+//                val name = item.fieldName
+//                log.info { "Item name: $name (${item.isFormField}" }
+//            }
+//        } catch (e: FileUploadException) {
+//            log.error { "File upload error $e" }
+//        } catch (e: IOException) {
+//            log.error { "Internal server IO error $e" }
+//        }
+//    }
 
 //    @PostMapping
 //    fun uploadFile(@RequestParam file: MultipartFile): String {
@@ -104,5 +137,18 @@ class FileController {
     @DeleteMapping("/{id}")
     fun deleteFile(@PathVariable id: Int) {
         DataManagerFactory.fileInfoDao.delete(id)
+    }
+
+    private fun String.sha512Token(): String {
+        val hex_chars = "0123456789ABCDEF"
+        val bytes = MessageDigest.getInstance("SHA-512")
+                .digest(this.toByteArray())
+        val result = StringBuilder(bytes.size * 2)
+        bytes.forEach {
+            val i = it.toInt()
+            result.append(hex_chars[i shr 4 and 0x0f])
+            result.append(hex_chars[i and 0x0f])
+        }
+        return result.toString()
     }
 }

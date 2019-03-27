@@ -1,7 +1,4 @@
-import dao.FileInfoDao
-import dao.ShowDao
-import dao.UserDao
-import dao.VideoDao
+import dao.*
 import data.tables.*
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -20,6 +17,7 @@ object DataManagerFactory {
     val showDao by lazy { ShowDao(dbConnection) }
     val userDao by lazy { UserDao(dbConnection) }
     val videoDao by lazy { VideoDao(dbConnection) }
+    val tokenDao by lazy { VideoTokenDao(dbConnection) }
 
 
     private fun createDB(): Database {
@@ -27,7 +25,7 @@ object DataManagerFactory {
         TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
         transaction {
             SchemaUtils.create(ShowTable, FileInfoTable, FollowingTable, NotificationTable,
-                    SeenTable, SessionTable, UserTable, VideoTable, ExternalIdsTable)
+                    SeenTable, VideoTokenTable, UserTable, VideoTable, ExternalIdsTable)
         }
         return db
     }

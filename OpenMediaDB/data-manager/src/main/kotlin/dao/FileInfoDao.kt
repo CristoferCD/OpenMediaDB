@@ -7,6 +7,7 @@ import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.nio.file.Path
+import java.nio.file.Paths
 
 class FileInfoDao(override val dbConnection: Database) : IBaseDao<FileInfo, Int> {
     override fun get(key: Int): FileInfo? {
@@ -66,7 +67,7 @@ class FileInfoDao(override val dbConnection: Database) : IBaseDao<FileInfo, Int>
 
     private fun ResultRow.toDataClass() = FileInfo(
             id = this[FileInfoTable.id].value,
-            path = Path.of(this[FileInfoTable.uri]),
+            path = Paths.get(this[FileInfoTable.uri]),
             duration = this[FileInfoTable.duration],
             resolution = this[FileInfoTable.resolution],
             bitrate = this[FileInfoTable.bitrate],

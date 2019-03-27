@@ -2,7 +2,8 @@ import data.ImportResult
 import data.VideoFileInfo
 import exceptions.FileParseException
 import java.io.File
-import java.net.URI
+import java.io.FileOutputStream
+import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -57,15 +58,14 @@ class FileCrawler {
         throw FileParseException(name, shownamePattern)
     }
 
-    fun importData(info: VideoFileInfo, fileExtension: String, data: ByteArray): Path {
-        var directoryTarget = directoryPattern.replace("#(name)", info.name)
-        directoryTarget = directoryTarget.replace("#(season)", info.season)
+    fun importData(info: VideoFileInfo, fileExtension: String, data: InputStream): Path {
+        var directoryTarget = directoryPattern.replace("#(name)", info.name.replace("[:/*\"?|<>] ?".toRegex(), " "))
+        directoryTarget = directoryTarget.replace("#(season)", info.season.replace("[:/*\"?|<>] ?".toRegex(), " "))
         directoryTarget = directoryTarget.replace("/", File.separator)
         directoryTarget = directoryTarget.replace("\\", File.separator)
-        directoryTarget = directoryTarget.replace("[:/*\"?|<>] ?".toRegex(), " ")
         val targetPath = Paths.get(libraryRoot, directoryTarget, "${createCorrectName(info)}.$fileExtension")
         Files.createDirectories(targetPath.parent)
-        Files.write(targetPath, data)
+        Files.copy(data, targetPath, StandardCopyOption.REPLACE_EXISTING)
         return targetPath
     }
 
@@ -88,7 +88,7 @@ class FileCrawler {
     private fun createCorrectName(info: VideoFileInfo): String {
         var name = shownamePattern.replace("(?<name>.+)", info.name)
         name = name.replace("(?<season>.+)", info.season)
-        name =  name.replace("(?<episode>.+)", info.episode)
+        name =  name.replace("(?<episode>.+)", if (info.episode.toInt() < 10) "0${info.episode}" else info.episode)
         name =  name.replace("(?<epName>.+)", info.episodeName.replace("/", "_"))
         return name.replace("[:/*\"?|<>] ?".toRegex(), " ")
     }
