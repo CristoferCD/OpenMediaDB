@@ -61,7 +61,7 @@ class VideoTokenDao(override val dbConnection: Database) : IBaseDao<VideoToken, 
             VideoTokenTable.update({ VideoTokenTable.id eq obj.id }) {
                 it[fileId] = FileInfoTable.select { FileInfoTable.id eq obj.fileId }.limit(1).first()[FileInfoTable.id]
                 it[token] = obj.token
-                it[expires] = DateTime(obj.expires.toInstant())
+                it[expires] = DateTime(obj.expires.toInstant().toEpochMilli())
             }
         }
     }

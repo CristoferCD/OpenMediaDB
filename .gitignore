@@ -18,3 +18,5 @@ OpenMediaDB/target/
 OpenMediaDB/open-media-db-parent/target/
 
 *.iml
+
+OpenMediaDB/openmediadb\.log

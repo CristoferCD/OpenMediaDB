@@ -6,35 +6,34 @@ import data.FileInfo
 import data.VideoFileInfo
 import data.VideoToken
 import mu.KotlinLogging
-import org.apache.tomcat.util.http.fileupload.FileUploadException
-import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload
-import org.springframework.core.io.FileSystemResource
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
-import org.springframework.web.server.ResponseStatusException
-import java.io.IOException
-import java.lang.StringBuilder
 import java.security.MessageDigest
 import java.time.ZonedDateTime
-import javax.servlet.http.HttpServletRequest
 
 @RestController
 @RequestMapping("/files")
 class FileController {
-    private val log = KotlinLogging.logger{}
+    private val log = KotlinLogging.logger {}
 
     @GetMapping("/{id}")
     fun getFile(@PathVariable id: Int): String {
         val file = DataManagerFactory.fileInfoDao.get(id)!!
-        val token = VideoToken(
-                fileId = file.id!!,
-                token = file.path.toString().sha512Token(),
-                expires = ZonedDateTime.now().plusDays(1)
-        )
-        DataManagerFactory.tokenDao.insert(token)
-        return token.token
+        val tokenStr = file.path.toString().sha512Token()
+        val existingToken = DataManagerFactory.tokenDao.get(tokenStr)
+        return if (existingToken != null) {
+            DataManagerFactory.tokenDao.update(
+                    existingToken.copy(expires = ZonedDateTime.now().plusDays(1)))
+            existingToken.token
+        } else {
+            val token = VideoToken(
+                    fileId = file.id!!,
+                    token = tokenStr,
+                    expires = ZonedDateTime.now().plusDays(1)
+            )
+            DataManagerFactory.tokenDao.insert(token)
+            token.token
+        }
     }
 
     @PostMapping

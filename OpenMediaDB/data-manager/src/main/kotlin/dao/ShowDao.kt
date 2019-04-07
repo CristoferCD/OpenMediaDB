@@ -49,6 +49,8 @@ class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
                     it[id] = EntityID(obj.imdbId, ShowTable)
                     it[name] = obj.name
                     it[sinopsis] = obj.sinopsis
+                    it[totalSeasons] = obj.totalSeasons
+                    it[totalEpisodes] = obj.totalEpisodes
                     it[imgPoster] = obj.imgPoster
                     it[imgBackground] = obj.imgBackground
                     it[path] = obj.path
@@ -68,6 +70,8 @@ class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
             ShowTable.update({ ShowTable.id eq obj.imdbId }) {
                 it[name] = obj.name
                 it[sinopsis] = obj.sinopsis
+                it[totalSeasons] = obj.totalSeasons
+                it[totalEpisodes] = obj.totalEpisodes
                 it[imgPoster] = obj.imgPoster
                 it[imgBackground] = obj.imgBackground
                 it[path] = obj.path
@@ -129,6 +133,8 @@ class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
                 imdbId = data[ShowTable.id].value,
                 name = data[ShowTable.name],
                 sinopsis = data[ShowTable.sinopsis],
+                totalSeasons = data[ShowTable.totalSeasons],
+                totalEpisodes = data[ShowTable.totalEpisodes],
                 imgPoster = data[ShowTable.imgPoster],
                 imgBackground = data[ShowTable.imgBackground],
                 path = data[ShowTable.path],

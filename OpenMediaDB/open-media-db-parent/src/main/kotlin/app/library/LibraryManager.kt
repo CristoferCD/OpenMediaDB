@@ -37,6 +37,13 @@ internal object LibraryManager {
         }
     }
 
+    fun registerAllEpisodes(showId: String) {
+        val show = getOrCreateShow(showId)
+        TMDbManager.getEpisodesFromSeason(show, 1..show.totalSeasons).forEach {
+            createEpisodeEntry(it)
+        }
+    }
+
     fun getOrCreateEpisode(parent: Show, season: Int, episodeNumber: Int): Video {
         return DataManagerFactory.videoDao.findFromParent(parent.imdbId, season, episodeNumber).firstOrNull()
                 ?: run {
@@ -48,6 +55,7 @@ internal object LibraryManager {
     private fun createShowEntry(show: Show) {
         show.path = fileCrawler.libraryRoot + "\\" + show.name
         DataManagerFactory.showDao.insert(show)
+        registerAllEpisodes(show.imdbId)
     }
 
     private fun createEpisodeEntry(video: Video): Video {

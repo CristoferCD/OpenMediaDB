@@ -16,6 +16,8 @@ class VideoDaoTest {
                     imdbId = "tt0944947",
                     name = "Game of Thrones",
                     sinopsis = "Seven noble families fight for control of the mythical land of Westeros. Friction between the houses leads to full-scale war. All while a very ancient evil awakens in the farthest north. Amidst the war, a neglected military order of misfits, the Night's Watch, is all that stands between the realms of men and icy horrors beyond.",
+                    totalSeasons = 8,
+                    totalEpisodes = 76,
                     path = "",
                     externalIds = ExternalIds(
                             id = null,

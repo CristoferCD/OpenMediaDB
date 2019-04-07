@@ -16,14 +16,9 @@ class ShowController {
 
     @PostMapping
     fun registerShow(@RequestParam imdbId: String): String {
-        val show = TMDbManager.find(imdbId)
-        println("Requested creation of $show")
-        return if (show != null) {
-            LibraryManager.createOrUpdateShow(show)
-            "Successfully created show [${show.imdbId}] - ${show.name}"
-        } else {
-            "Unable to find show with id $imdbId"
-        }
+        println("Requested creation of $imdbId")
+        LibraryManager.getOrCreateShow(imdbId)
+        return "TODO"
     }
 
     @GetMapping
