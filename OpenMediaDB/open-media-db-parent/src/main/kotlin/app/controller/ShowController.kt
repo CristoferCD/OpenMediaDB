@@ -34,8 +34,8 @@ class ShowController {
 
     @PostMapping("/following")
     fun doFollow(@RequestBody booleanAction: BooleanActionRB): Boolean {
-        val authenticatedUser = 1
-        DataManagerFactory.showDao.follow(booleanAction.actionValue, booleanAction.showId, authenticatedUser)
+        val user = DataManagerFactory.userDao.findByName(SecurityContextHolder.getContext().authentication.name)
+        DataManagerFactory.showDao.follow(booleanAction.actionValue, booleanAction.showId, user?.id!!)
         //TODO: check
         return true
     }

@@ -8,6 +8,7 @@ data class Video (
         var name: String,
         var season: Int,
         var episodeNumber: Int,
+        var seen: Boolean = false,
         var sinopsis: String,
         var imgPoster: String?,
         var externalIds: ExternalIds

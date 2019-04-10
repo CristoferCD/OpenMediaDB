@@ -16,7 +16,8 @@ class EpisodeController {
     fun findEpisode(@RequestParam("show") showId: String,
                     @RequestParam(required = false) season: Int?,
                     @RequestParam(required = false) episode: Int?): List<Video> {
-        return DataManagerFactory.videoDao.findFromParent(showId, season, episode)
+        val user = DataManagerFactory.userDao.findByName(SecurityContextHolder.getContext().authentication.name)
+        return DataManagerFactory.videoDao.findFromParent(showId, season, episode, user?.id!!)
     }
 
     @GetMapping("/{id}")

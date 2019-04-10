@@ -78,14 +78,16 @@ object TMDbManager {
     private fun toTVShow(tvShow: TvSeries): Show? {
         val item = apiAccess.tvSeries.getSeries(tvShow.id, "en", TmdbTV.TvMethod.external_ids)
         if (item.externalIds.imdbId == null) return null
+        val poster = if (item.posterPath != null) tmdbConfig.baseUrl + tmdbConfig.posterSizes?.last() + item.posterPath else null
+        val background = if (item.backdropPath != null) tmdbConfig.baseUrl + tmdbConfig.backdropSizes?.last() + item.backdropPath else null
         return Show(
                 imdbId = item.externalIds.imdbId,
                 name = item.name ?: item.originalName,
                 sinopsis = item.overview,
                 totalSeasons = item.numberOfSeasons,
                 totalEpisodes = item.numberOfEpisodes,
-                imgPoster = tmdbConfig.baseUrl + tmdbConfig.posterSizes?.last() + item.posterPath,
-                imgBackground = tmdbConfig.baseUrl + tmdbConfig.backdropSizes?.last() + item.backdropPath,
+                imgPoster = poster,
+                imgBackground = background,
                 path = "",
                 externalIds = ExternalIds(imdb = item.externalIds?.imdbId,
                         tmdb = item.id,
@@ -96,14 +98,16 @@ object TMDbManager {
     private fun toMovie(movie: MovieDb): Show? {
         val item = apiAccess.movies.getMovie(movie.id, "en")
         if (item.imdbID == null) return null
+        val poster = if (item.posterPath != null) tmdbConfig.baseUrl + tmdbConfig.posterSizes?.last() + item.posterPath else null
+        val background = if (item.backdropPath != null) tmdbConfig.baseUrl + tmdbConfig.backdropSizes?.last() + item.backdropPath else null
         return Show(
                 imdbId = item.imdbID,
                 name = item.originalTitle ?: item.title,
                 sinopsis = item.overview,
                 totalSeasons = 1,
                 totalEpisodes = 1,
-                imgPoster = tmdbConfig.baseUrl + tmdbConfig.posterSizes?.last() + item.posterPath,
-                imgBackground = tmdbConfig.baseUrl + tmdbConfig.backdropSizes?.last() + item.backdropPath,
+                imgPoster = poster,
+                imgBackground = background,
                 path = "",
                 externalIds = ExternalIds(imdb = item.imdbID,
                         tmdb = item.id)
@@ -112,6 +116,7 @@ object TMDbManager {
 
     private fun toVideo(episode: TvEpisode, parentId: String): Video? {
         val image = episode.images?.stills?.firstOrNull()?.filePath
+        val poster = if (image != null) tmdbConfig.baseUrl + tmdbConfig.posterSizes?.last() + image else null
         return Video(
                 id = null,
                 fileId = null,
@@ -121,7 +126,7 @@ object TMDbManager {
                 season = episode.seasonNumber,
                 episodeNumber = episode.episodeNumber,
                 sinopsis = episode.overview,
-                imgPoster = tmdbConfig.baseUrl + tmdbConfig.posterSizes?.last() + image,
+                imgPoster = poster,
                 externalIds = ExternalIds(
                         imdb = episode.externalIds?.imdbId,
                         tvdb = episode.externalIds?.tvdbId?.toInt(),

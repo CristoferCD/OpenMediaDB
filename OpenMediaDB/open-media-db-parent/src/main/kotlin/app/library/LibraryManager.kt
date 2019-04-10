@@ -6,6 +6,7 @@ import data.Show
 import data.Video
 import data.tmdb.TMDbManager
 import exceptions.ExistingEntityException
+import org.springframework.security.core.context.SecurityContextHolder
 
 internal object LibraryManager {
     val fileCrawler by lazy { FileCrawler() }
@@ -45,7 +46,8 @@ internal object LibraryManager {
     }
 
     fun getOrCreateEpisode(parent: Show, season: Int, episodeNumber: Int): Video {
-        return DataManagerFactory.videoDao.findFromParent(parent.imdbId, season, episodeNumber).firstOrNull()
+        val user = DataManagerFactory.userDao.findByName(SecurityContextHolder.getContext().authentication.name)
+        return DataManagerFactory.videoDao.findFromParent(parent.imdbId, season, episodeNumber, user?.id).firstOrNull()
                 ?: run {
                     val episode = TMDbManager.getEpisode(parent.externalIds.tmdb!!, season, episodeNumber) ?: TODO("Throw episode not found exception")
                     return createEpisodeEntry(episode)
