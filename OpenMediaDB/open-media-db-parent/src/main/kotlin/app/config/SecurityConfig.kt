@@ -26,7 +26,6 @@ open class SecurityConfig(private val userAuthService: UserAuthService) : WebSec
     open fun passwordEncoder() = BCryptPasswordEncoder()
 
     override fun configure(http: HttpSecurity?) {
-//        super.configure(http)
         http!!.cors().and().csrf().disable().authorizeRequests()
                 .antMatchers("/login", "/signup", "/video/*").permitAll()
                 .anyRequest().authenticated()

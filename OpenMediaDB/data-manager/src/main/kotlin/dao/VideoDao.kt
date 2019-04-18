@@ -119,7 +119,7 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
     fun findFromParent(showId: String, season: Int? = null, episode: Int? = null, userId: Int?): List<Video> {
         val found = mutableListOf<Video>()
         transaction(dbConnection) {
-            val query = (VideoTable innerJoin ExternalIdsTable innerJoin SeenTable).select { VideoTable.showId eq showId }
+            val query = (VideoTable innerJoin ExternalIdsTable).select { VideoTable.showId eq showId }
             season?.let {
                 query.andWhere { VideoTable.season eq season }
             }
@@ -127,7 +127,9 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
                 query.andWhere { VideoTable.episodeNumber eq episode }
             }
             userId?.let {
-                query.andWhere { SeenTable.userId eq userId }
+                query.adjustColumnSet {
+                    join(SeenTable, joinType = JoinType.LEFT, additionalConstraint = {SeenTable. userId eq userId })
+                }
             }
             query.forEach {
                 found.add(toVideo(it))

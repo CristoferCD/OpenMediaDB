@@ -4,21 +4,22 @@ import DataManagerFactory
 import app.library.LibraryManager
 import data.Show
 import data.request.BooleanActionRB
-import data.request.SearchRB
-import data.tmdb.TMDbBuilder
+import data.response.PagedResponse
 import data.tmdb.TMDbManager
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
 
 @RestController
 @RequestMapping("/shows")
-class ShowController {
+class ShowController : BaseController() {
 
     @PostMapping
-    fun registerShow(@RequestParam imdbId: String): String {
-        println("Requested creation of $imdbId")
+    fun registerShow(@RequestParam imdbId: String) {
+        log.info { "Requested creation of $imdbId" }
         LibraryManager.getOrCreateShow(imdbId)
-        return "TODO"
     }
 
     @GetMapping
@@ -28,26 +29,31 @@ class ShowController {
 
     @GetMapping("/following")
     fun getFollowing(): List<Show> {
-        val user = DataManagerFactory.userDao.findByName(SecurityContextHolder.getContext().authentication.name)
-        return DataManagerFactory.showDao.listFollowing(user?.id!!)
+        val user = getAuthenticatedUser() ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not logged in")
+        return DataManagerFactory.showDao.listFollowing(user)
     }
 
     @PostMapping("/following")
     fun doFollow(@RequestBody booleanAction: BooleanActionRB): Boolean {
-        val user = DataManagerFactory.userDao.findByName(SecurityContextHolder.getContext().authentication.name)
-        DataManagerFactory.showDao.follow(booleanAction.actionValue, booleanAction.showId, user?.id!!)
+        val user = getAuthenticatedUser() ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not logged in")
+        DataManagerFactory.showDao.follow(booleanAction.actionValue, booleanAction.showId, user)
         //TODO: check
         return true
     }
 
     @GetMapping("/find")
-    fun find(@RequestParam("q") query: String): List<Show> {
+    fun find(@RequestParam("q") query: String): ResponseEntity<PagedResponse<Show>> {
         TODO("Implement fuzzy string search to all entries on db")
     }
 
     @GetMapping("/{id}")
-    fun getShow(@PathVariable id: String): Show {
-        return DataManagerFactory.showDao.get(id)!!
+    fun getShow(@PathVariable id: String): ResponseEntity<Show> {
+        val show = DataManagerFactory.showDao.get(id)
+        if (show == null) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Show with requested id doesn't exist")
+        } else {
+            return ResponseEntity.ok(show)
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -56,7 +62,8 @@ class ShowController {
     }
 
     @GetMapping("/search")
-    fun search(@RequestParam query: String, @RequestParam(required = false) page: Int?): SearchRB {
-        return if (page == null) TMDbManager.search(query) else TMDbManager.search(query, page)
+    fun search(@RequestParam query: String, @RequestParam(required = false) page: Int?): ResponseEntity<PagedResponse<Show>> {
+        val searchResult = if (page == null) TMDbManager.search(query) else TMDbManager.search(query, page)
+        return ResponseEntity.ok(searchResult)
     }
 }

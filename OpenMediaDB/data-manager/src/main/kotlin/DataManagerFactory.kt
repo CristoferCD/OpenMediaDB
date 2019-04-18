@@ -24,7 +24,7 @@ object DataManagerFactory {
         val db = Database.connect("jdbc:sqlite:$dbName", driver = "org.sqlite.JDBC")
         TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
         transaction {
-            SchemaUtils.create(ShowTable, FileInfoTable, FollowingTable, NotificationTable,
+            SchemaUtils.createMissingTablesAndColumns(ShowTable, FileInfoTable, FollowingTable, NotificationTable,
                     SeenTable, VideoTokenTable, UserTable, VideoTable, ExternalIdsTable)
         }
         return db

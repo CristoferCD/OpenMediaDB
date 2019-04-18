@@ -3,15 +3,13 @@ package app.filter
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import data.request.AuthTokenRB
 import data.request.UserRB
+import data.response.AuthTokenResponse
 import mu.KotlinLogging
-import org.apache.catalina.User
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import java.time.LocalDateTime
@@ -48,7 +46,7 @@ class JWTAuthenticationFilter(val authManager: AuthenticationManager): UsernameP
                         .atZone(ZoneId.systemDefault()).toInstant()))
                 .sign(Algorithm.HMAC512(secret.toByteArray()))
         response?.addHeader(header, "$tokenPrefix$token")
-        val tokenResponse = jacksonObjectMapper().writeValueAsString(AuthTokenRB(token))
+        val tokenResponse = jacksonObjectMapper().writeValueAsString(AuthTokenResponse(token))
         response?.outputStream.use {
             it?.write(tokenResponse.toByteArray())
         }

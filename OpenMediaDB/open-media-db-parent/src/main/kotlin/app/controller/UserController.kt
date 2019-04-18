@@ -22,6 +22,6 @@ class UserController {
                 name = user.name,
                 password = passwordEncoder.encode(user.password)
         ))
-        //TODO: Return something
+        //TODO: Auto log in
     }
 }

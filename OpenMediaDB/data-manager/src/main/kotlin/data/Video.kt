@@ -1,5 +1,7 @@
 package data
 
+import java.time.LocalDate
+
 data class Video (
         val id: Int?,
         var fileId: Int?,
@@ -9,6 +11,7 @@ data class Video (
         var season: Int,
         var episodeNumber: Int,
         var seen: Boolean = false,
+        var airDate: LocalDate = LocalDate.MIN!!,
         var sinopsis: String,
         var imgPoster: String?,
         var externalIds: ExternalIds

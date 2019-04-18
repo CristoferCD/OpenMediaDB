@@ -3,9 +3,8 @@ package data.tmdb
 import data.ExternalIds
 import data.Show
 import data.Video
-import data.request.SearchRB
+import data.response.PagedResponse
 import info.movito.themoviedbapi.TmdbFind
-import info.movito.themoviedbapi.TmdbMovies
 import info.movito.themoviedbapi.TmdbTV
 import info.movito.themoviedbapi.TmdbTvEpisodes
 import info.movito.themoviedbapi.model.MovieDb
@@ -47,7 +46,7 @@ object TMDbManager {
         return toVideo(episode, parent.externalIds.imdbId)
     }
 
-    fun search(query: String, page: Int = 0): SearchRB {
+    fun search(query: String, page: Int = 0): PagedResponse<Show> {
         val searchResult = apiAccess.search.searchMulti(query, "en", page)
         val showList = searchResult.results.mapNotNull {
             when (it) {
@@ -56,7 +55,7 @@ object TMDbManager {
                 else -> null
             }
         }
-        return SearchRB(
+        return PagedResponse(
                 showList,
                 searchResult.totalResults,
                 page,
