@@ -1,11 +1,12 @@
 package app.controller
 
+import DataManagerFactory
 import mu.KotlinLogging
 import org.springframework.security.core.context.SecurityContextHolder
 
 abstract class BaseController {
 
-    protected  val log = KotlinLogging.logger {}
+    protected val log = KotlinLogging.logger {}
 
     fun getAuthenticatedUser(): Int? {
         val username = SecurityContextHolder.getContext().authentication.name

@@ -42,17 +42,17 @@ class ShowController : BaseController() {
     }
 
     @GetMapping("/find")
-    fun find(@RequestParam("q") query: String): ResponseEntity<PagedResponse<Show>> {
+    fun find(@RequestParam("q") query: String): PagedResponse<Show> {
         TODO("Implement fuzzy string search to all entries on db")
     }
 
     @GetMapping("/{id}")
-    fun getShow(@PathVariable id: String): ResponseEntity<Show> {
+    fun getShow(@PathVariable id: String): Show {
         val show = DataManagerFactory.showDao.get(id)
         if (show == null) {
             throw ResponseStatusException(HttpStatus.NOT_FOUND, "Show with requested id doesn't exist")
         } else {
-            return ResponseEntity.ok(show)
+            return show
         }
     }
 
@@ -62,8 +62,8 @@ class ShowController : BaseController() {
     }
 
     @GetMapping("/search")
-    fun search(@RequestParam query: String, @RequestParam(required = false) page: Int?): ResponseEntity<PagedResponse<Show>> {
+    fun search(@RequestParam query: String, @RequestParam(required = false) page: Int?): PagedResponse<Show> {
         val searchResult = if (page == null) TMDbManager.search(query) else TMDbManager.search(query, page)
-        return ResponseEntity.ok(searchResult)
+        return searchResult
     }
 }

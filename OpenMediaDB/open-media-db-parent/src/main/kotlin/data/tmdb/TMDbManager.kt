@@ -10,6 +10,7 @@ import info.movito.themoviedbapi.TmdbTvEpisodes
 import info.movito.themoviedbapi.model.MovieDb
 import info.movito.themoviedbapi.model.tv.TvEpisode
 import info.movito.themoviedbapi.model.tv.TvSeries
+import java.time.LocalDate
 
 object TMDbManager {
     val apiAccess by lazy {
@@ -123,6 +124,7 @@ object TMDbManager {
                 imdbId = episode.externalIds?.imdbId,
                 name = episode.name,
                 season = episode.seasonNumber,
+                airDate = LocalDate.parse(episode.airDate),
                 episodeNumber = episode.episodeNumber,
                 sinopsis = episode.overview,
                 imgPoster = poster,

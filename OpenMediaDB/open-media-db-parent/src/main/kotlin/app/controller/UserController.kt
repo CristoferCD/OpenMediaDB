@@ -1,5 +1,6 @@
 package app.controller
 
+import app.service.UserAuthService
 import data.User
 import data.request.UserRB
 import org.springframework.beans.factory.annotation.Autowired

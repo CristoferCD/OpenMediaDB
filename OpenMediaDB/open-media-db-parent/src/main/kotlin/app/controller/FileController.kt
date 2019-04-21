@@ -5,8 +5,6 @@ import app.library.LibraryManager
 import data.FileInfo
 import data.VideoFileInfo
 import data.VideoToken
-import mu.KotlinLogging
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import java.security.MessageDigest
@@ -17,14 +15,14 @@ import java.time.ZonedDateTime
 class FileController: BaseController() {
 
     @GetMapping("/{id}")
-    fun getFile(@PathVariable id: Int): ResponseEntity<String> {
+    fun getFile(@PathVariable id: Int): String {
         val file = DataManagerFactory.fileInfoDao.get(id)!!
         val tokenStr = file.path.toString().sha512Token()
         val existingToken = DataManagerFactory.tokenDao.get(tokenStr)
         return if (existingToken != null) {
             DataManagerFactory.tokenDao.update(
                     existingToken.copy(expires = ZonedDateTime.now().plusDays(1)))
-            ResponseEntity.ok(existingToken.token)
+            existingToken.token
         } else {
             val token = VideoToken(
                     fileId = file.id!!,
@@ -32,7 +30,7 @@ class FileController: BaseController() {
                     expires = ZonedDateTime.now().plusDays(1)
             )
             DataManagerFactory.tokenDao.insert(token)
-            ResponseEntity.ok(token.token)
+            token.token
         }
     }
 

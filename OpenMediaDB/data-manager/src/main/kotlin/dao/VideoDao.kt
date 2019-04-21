@@ -7,6 +7,9 @@ import exceptions.ExistingEntityException
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.joda.time.DateTime
+import org.joda.time.LocalDate
+import java.time.ZoneId
 
 class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
     override fun get(key: Int): Video? {
@@ -58,6 +61,7 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
                         else null
                     it[name] = obj.name
                     it[season] = obj.season
+                    it[airDate] = DateTime(obj.airDate.year, obj.airDate.monthValue, obj.airDate.dayOfMonth, 0, 0)
                     it[episodeNumber] = obj.episodeNumber
                     it[sinopsis] = obj.sinopsis
                     it[imgPoster] = obj.imgPoster
@@ -79,6 +83,7 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
                 it[imdbId] = obj.imdbId
                 it[name] = obj.name
                 it[season] = obj.season
+                it[airDate] = DateTime(obj.airDate.year, obj.airDate.monthValue, obj.airDate.dayOfMonth, 0, 0)
                 it[episodeNumber] = obj.episodeNumber
                 it[sinopsis] = obj.sinopsis
                 it[imgPoster] = obj.imgPoster
@@ -147,6 +152,7 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
                 name = data[VideoTable.name],
                 seen = data.tryGet(SeenTable.seen) ?: false,
                 season = data[VideoTable.season],
+                airDate = data[VideoTable.airDate].toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
                 episodeNumber = data[VideoTable.episodeNumber],
                 sinopsis = data[VideoTable.sinopsis],
                 imgPoster = data[VideoTable.imgPoster],

@@ -16,24 +16,24 @@ class EpisodeController: BaseController() {
     @GetMapping
     fun findEpisode(@RequestParam("show") showId: String,
                     @RequestParam(required = false) season: Int?,
-                    @RequestParam(required = false) episode: Int?): ResponseEntity<List<Video>> {
+                    @RequestParam(required = false) episode: Int?): List<Video> {
         val user = getAuthenticatedUser()
-        return ResponseEntity.ok(DataManagerFactory.videoDao.findFromParent(showId, season, episode, user))
+        return DataManagerFactory.videoDao.findFromParent(showId, season, episode, user)
     }
 
     @GetMapping("/{id}")
-    fun getEpisode(@PathVariable id: String): ResponseEntity<Video> {
+    fun getEpisode(@PathVariable id: String): Video {
         val video = DataManagerFactory.videoDao.get(id)
         if (video != null)
-            return ResponseEntity.ok(video)
+            return video
         else
             throw ResponseStatusException(HttpStatus.NOT_FOUND, "Episode not found")
     }
 
     @PostMapping("/{id}/seen")
-    fun markSeen(@PathVariable id: String, @RequestBody booleanAction: BooleanActionRB): ResponseEntity<Boolean> {
+    fun markSeen(@PathVariable id: String, @RequestBody booleanAction: BooleanActionRB): Boolean {
         val user = getAuthenticatedUser() ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not logged in")
         DataManagerFactory.videoDao.markWatched(booleanAction.actionValue, user, id.toInt())
-        return ResponseEntity.ok(booleanAction.actionValue)
+        return booleanAction.actionValue
     }
 }
