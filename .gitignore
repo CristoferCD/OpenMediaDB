@@ -22,3 +22,5 @@ OpenMediaDB/open-media-db-parent/target/
 OpenMediaDB/openmediadb\.log
 
 *.gz
+
+OpenMediaDB/subtitle-manager/target/

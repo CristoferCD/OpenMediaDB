@@ -16,34 +16,32 @@ class FileCrawler {
     var libraryRoot: String = ""
     var directoryPattern: String = ""
     var shownamePattern: String = ""
-    //TODO: shownamePatter must at least have name, season and episode number
+    //TODO: shownamePattern must at least have name, season and episode number
 
     init {
         this.javaClass.getResourceAsStream(CONFIG_FILE).use {
             properties.load(it)
             libraryRoot = properties.getProperty("library.root") ?: ""
             directoryPattern = properties.getProperty("pattern.directory") ?: "#(name)/#(season)ª Temp"
-            shownamePattern = properties.getProperty("pattern.showname") ?: "(?<name>.+) (?<season>.+)x(?<episode>.+)"
+            shownamePattern = properties.getProperty("pattern.showname") ?: "(?<name>.+) (?<season>.+)x(?<episode>.+) - (?<epName>.+)"
         }
     }
 
     fun importLibrary(from: File, destructive: Boolean = false): ImportResult {
         val result = ImportResult()
-        from.walk().forEach {
-            if (it.isFile) {
-                try {
-                    val info = importFile(it, destructive)
-                    result.successfulImports.add(info)
-                } catch (e: Exception) {
-                    result.failedImports.add(it.absolutePath)
-                }
+        from.walk().filter{it.isFile}.forEach {
+            try {
+                val info = parseFileInfo(it)
+                result.successfulImports.add(info)
+            } catch (e: Exception) {
+                result.failedImports.add(it.absolutePath)
             }
         }
         return result
     }
 
     fun parseFileInfo(file: File): VideoFileInfo {
-        return parseFileName(file.nameWithoutExtension)
+        return parseFileName(file.nameWithoutExtension).copy(path = file.toPath())
     }
 
     fun parseFileName(name: String): VideoFileInfo {
@@ -52,8 +50,7 @@ class FileCrawler {
             return VideoFileInfo(match.groups["name"]!!.value,
                     match.groups["season"]!!.value,
                     match.groups["episode"]!!.value,
-                    if (shownamePattern.contains("(?<episodeName>")) match.groups["episodeName"]!!.value else "",
-                    name)
+                    if (shownamePattern.contains("(?<epName>")) match.groups["epName"]!!.value else "")
         }
         throw FileParseException(name, shownamePattern)
     }
@@ -81,7 +78,7 @@ class FileCrawler {
             Files.move(from.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING)
         else
             Files.copy(from.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING)
-        fileInfo.path = targetPath.toString()
+        fileInfo.path = targetPath
         return fileInfo
     }
 

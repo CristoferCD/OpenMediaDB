@@ -13,6 +13,7 @@
         <module>omdb-api</module>
         <module>file-crawler</module>
         <module>open-media-db-parent</module>
+        <module>subtitle-manager</module>
     </modules>
 
     <repositories>

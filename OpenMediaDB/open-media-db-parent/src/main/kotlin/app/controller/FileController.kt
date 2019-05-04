@@ -45,8 +45,7 @@ class FileController: BaseController() {
                 name = show.name,
                 season = episodeInfo.season.toString(),
                 episode = episodeInfo.episodeNumber.toString(),
-                episodeName = episodeInfo.name,
-                path = ""
+                episodeName = episodeInfo.name
         ), extension, file.inputStream)
         val fileId = DataManagerFactory.fileInfoDao.insert(FileInfo(
                 id = null,

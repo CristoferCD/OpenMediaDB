@@ -11,7 +11,7 @@ data class Video (
         var season: Int,
         var episodeNumber: Int,
         var seen: Boolean = false,
-        var airDate: LocalDate = LocalDate.MIN!!,
+        var airDate: LocalDate = LocalDate.of(1970, 1, 1),
         var sinopsis: String,
         var imgPoster: String?,
         var externalIds: ExternalIds

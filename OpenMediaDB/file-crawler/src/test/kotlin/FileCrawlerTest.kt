@@ -5,11 +5,10 @@ internal class FileCrawlerTest {
 
     @Test
     fun importTest() {
-        assert(true)
-//        var crawler = FileCrawler()
-//        val result = crawler.importLibrary(File("\\\\ORANGEPIZERO\\opiserver\\Anime\\Rascal Does Not Dream of Bunny Girl Senpai"))
-//        println(result.successfulImports)
-//        println(result.failedImports)
+        val crawler = FileCrawler()
+        val result = crawler.importLibrary(File("\\\\ORANGEPIZERO\\opiserver\\omedialibrary"))
+        println(result.successfulImports)
+        println(result.failedImports)
     }
 
     @Test
