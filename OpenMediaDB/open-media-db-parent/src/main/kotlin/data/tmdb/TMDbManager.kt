@@ -124,7 +124,7 @@ object TMDbManager {
                 imdbId = episode.externalIds?.imdbId,
                 name = episode.name,
                 season = episode.seasonNumber,
-                airDate = LocalDate.parse(episode.airDate),
+                airDate = if (episode.airDate.isNullOrBlank()) LocalDate.of(1970, 1, 1) else LocalDate.parse(episode.airDate),
                 episodeNumber = episode.episodeNumber,
                 sinopsis = episode.overview,
                 imgPoster = poster,
