@@ -35,7 +35,7 @@ class FileController: BaseController() {
     }
 
     @PostMapping
-    fun uploadFile(@RequestParam showId: String, @RequestParam season: Int, @RequestParam episode: Int, @RequestParam file: MultipartFile) {
+    fun uploadFile(@RequestParam showId: String, @RequestParam season: Int, @RequestParam episode: Int, @RequestParam file: MultipartFile): String {
         log.info { "[uploadFile] - showId: $showId, season: $season, episode: $episode, file: ${file.originalFilename}-${file.contentType}" }
         val show = LibraryManager.getOrCreateShow(showId)
         val episodeInfo = LibraryManager.getOrCreateEpisode(show, season, episode)
@@ -47,16 +47,8 @@ class FileController: BaseController() {
                 episode = episodeInfo.episodeNumber.toString(),
                 episodeName = episodeInfo.name
         ), extension, file.inputStream)
-        val fileId = DataManagerFactory.fileInfoDao.insert(FileInfo(
-                id = null,
-                codec = "",
-                bitrate = "",
-                resolution = "",
-                duration = null,
-                path = path
-        ))
-        episodeInfo.fileId = fileId
-        DataManagerFactory.videoDao.update(episodeInfo)
+        val fileId = LibraryManager.insertFile(episodeInfo, path)
+        return "Created video with reference $fileId"
     }
 
 //    @PostMapping

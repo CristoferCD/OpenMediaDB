@@ -10,6 +10,7 @@ import exceptions.ExistingEntityException
 import mu.KotlinLogging
 import org.springframework.security.core.context.SecurityContextHolder
 import java.io.File
+import java.nio.file.Path
 
 internal object LibraryManager {
     val fileCrawler by lazy { FileCrawler() }
@@ -72,17 +73,23 @@ internal object LibraryManager {
             }
 
             val episode = getOrCreateEpisode(createdShows[it.name]!!, it.season.toInt(), it.episode.toInt())
-            val fileId = DataManagerFactory.fileInfoDao.insert(FileInfo(
-                    id = null,
-                    codec = "",
-                    bitrate = "",
-                    resolution = "",
-                    duration = null,
-                    path = it.path!!
-            ))
-            episode.fileId = fileId
-            DataManagerFactory.videoDao.update(episode)
+            insertFile(episode, it.path!!)
         }
+    }
+
+    fun insertFile(episode: Video, path: Path): Int {
+        //TODO: Load file info using ffmpeg
+        val fileId = DataManagerFactory.fileInfoDao.insert(FileInfo(
+                id = null,
+                codec = "",
+                bitrate = "",
+                resolution = "",
+                duration = null,
+                path = path
+        ))
+        episode.fileId = fileId
+        DataManagerFactory.videoDao.update(episode)
+        return fileId
     }
 
     private fun createShowEntry(show: Show) {

@@ -150,7 +150,7 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
                 showId = data[VideoTable.showId].value,
                 imdbId = data[VideoTable.imdbId],
                 name = data[VideoTable.name],
-                seen = data.tryGet(SeenTable.seen) ?: false,
+                seen = data.getOrNull(SeenTable.seen) ?: false,
                 season = data[VideoTable.season],
                 airDate = data[VideoTable.airDate].toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
                 episodeNumber = data[VideoTable.episodeNumber],
