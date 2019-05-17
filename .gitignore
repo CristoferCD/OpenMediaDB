@@ -26,3 +26,5 @@ OpenMediaDB/openmediadb\.log
 OpenMediaDB/subtitle-manager/target/
 
 \.scannerwork/
+
+OpenMediaDB/common/target/

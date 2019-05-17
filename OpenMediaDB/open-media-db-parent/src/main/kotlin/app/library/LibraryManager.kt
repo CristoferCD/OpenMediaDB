@@ -46,7 +46,12 @@ internal object LibraryManager {
     fun registerAllEpisodes(showId: String) {
         val show = getOrCreateShow(showId)
         TMDbManager.getEpisodesFromSeason(show, 1..show.totalSeasons).forEach {
-            createEpisodeEntry(it)
+            val existingEpisode = DataManagerFactory.videoDao.findFromParent(showId, it.season, it.episodeNumber)
+            if (existingEpisode.size == 1) {
+                DataManagerFactory.videoDao.update(it.copy(id = existingEpisode.first().id))
+            } else {
+                createEpisodeEntry(it)
+            }
         }
     }
 
@@ -62,7 +67,7 @@ internal object LibraryManager {
 
     fun refreshLibrary() {
         val importResult = fileCrawler.importLibrary(File(fileCrawler.libraryRoot))
-        log.debug { "Imported library from ${fileCrawler.libraryRoot}: $importResult" }
+        log.info { "Imported library from ${fileCrawler.libraryRoot}: $importResult" }
         if (!importResult.failedImports.isEmpty()) throw Exception("Failed to import some items") //TODO: make custom exception
 
         val createdShows = mutableMapOf<String, Show>()
@@ -73,7 +78,16 @@ internal object LibraryManager {
             }
 
             val episode = getOrCreateEpisode(createdShows[it.name]!!, it.season.toInt(), it.episode.toInt())
-            insertFile(episode, it.path!!)
+            if (episode.fileId != null) {
+                val existingFile = DataManagerFactory.fileInfoDao.get(episode.fileId!!)
+                if (existingFile != null) {
+                    DataManagerFactory.fileInfoDao.update(existingFile.copy(path = it.path!!))
+                } else {
+                    insertFile(episode, it.path!!)
+                }
+            } else {
+                insertFile(episode, it.path!!)
+            }
         }
     }
 

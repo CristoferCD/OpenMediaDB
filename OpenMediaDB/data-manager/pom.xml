@@ -19,6 +19,11 @@
             <version>${sqlite.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.cristcd.open-media-db</groupId>
+            <artifactId>common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
 </project>

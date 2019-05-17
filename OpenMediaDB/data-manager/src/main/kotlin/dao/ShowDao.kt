@@ -11,6 +11,7 @@ import org.jetbrains.exposed.dao.EntityID
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import util.diceCoefficient
 
 class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
     override fun get(key: String): Show? {
@@ -107,7 +108,7 @@ class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
     fun listFollowing(userId: Int): List<Show> {
         val shows = mutableListOf<Show>()
         transaction(dbConnection) {
-            (FollowingTable innerJoin ShowTable)
+            (FollowingTable innerJoin ShowTable innerJoin ExternalIdsTable)
                     .select { (FollowingTable.userId eq userId and FollowingTable.following) }
                     .forEach {
                         shows.add(toShow(it))
@@ -119,10 +120,22 @@ class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
     fun find(name: String): List<Show> {
         val shows = mutableListOf<Show>()
         transaction(dbConnection) {
-            ShowTable.select {
-                ShowTable.id eq name
-            }.forEach {
-                shows.add(toShow(it))
+            val exactMatch = (ShowTable innerJoin ExternalIdsTable).select {
+                ShowTable.name eq name
+            }.firstOrNull()
+            if (exactMatch != null) {
+                shows.add(toShow(exactMatch))
+            } else {
+                ShowTable.slice(ShowTable.name).selectAll()
+                        .map { it[ShowTable.name] to it[ShowTable.name].diceCoefficient(name) }
+                        .filter { it.second > 0.7 }.maxBy { it.second }
+                        ?.let { bestMatch ->
+                            (ShowTable innerJoin ExternalIdsTable).select {
+                                ShowTable.name eq bestMatch.first
+                            }.forEach {
+                                shows.add(toShow(it))
+                            }
+                        }
             }
         }
         return shows
