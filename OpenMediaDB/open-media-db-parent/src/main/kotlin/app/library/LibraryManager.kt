@@ -38,14 +38,16 @@ internal object LibraryManager {
         show.path = fileCrawler.libraryRoot + "\\" + show.name
         try {
             DataManagerFactory.showDao.insert(show)
-        } catch(e: ExistingEntityException) {
+        } catch (e: ExistingEntityException) {
             DataManagerFactory.showDao.update(show)
         }
     }
 
     fun registerAllEpisodes(showId: String) {
         val show = getOrCreateShow(showId)
+        log.info { "Updating episodes for ${show.name}" }
         TMDbManager.getEpisodesFromSeason(show, 1..show.totalSeasons).forEach {
+            log.info { "Registering episode $it" }
             val existingEpisode = DataManagerFactory.videoDao.findFromParent(showId, it.season, it.episodeNumber)
             if (existingEpisode.size == 1) {
                 DataManagerFactory.videoDao.update(it.copy(id = existingEpisode.first().id))
@@ -60,12 +62,14 @@ internal object LibraryManager {
         val user = if (username != null) DataManagerFactory.userDao.findByName(username) else null
         return DataManagerFactory.videoDao.findFromParent(parent.imdbId, season, episodeNumber, user?.id).firstOrNull()
                 ?: run {
-                    val episode = TMDbManager.getEpisode(parent.externalIds.tmdb!!, season, episodeNumber) ?: TODO("Throw episode not found exception")
+                    val episode = TMDbManager.getEpisode(parent.externalIds.tmdb!!, season, episodeNumber)
+                            ?: TODO("Throw episode not found exception")
                     return createEpisodeEntry(episode)
                 }
     }
 
     fun refreshLibrary() {
+        log.info { "Started library refresh" }
         val importResult = fileCrawler.importLibrary(File(fileCrawler.libraryRoot))
         log.info { "Imported library from ${fileCrawler.libraryRoot}: $importResult" }
         if (!importResult.failedImports.isEmpty()) throw Exception("Failed to import some items") //TODO: make custom exception
@@ -81,13 +85,20 @@ internal object LibraryManager {
             if (episode.fileId != null) {
                 val existingFile = DataManagerFactory.fileInfoDao.get(episode.fileId!!)
                 if (existingFile != null) {
+                    log.info { "Updating episode $episode" }
                     DataManagerFactory.fileInfoDao.update(existingFile.copy(path = it.path!!))
                 } else {
+                    log.info { "Registering file ${it.path} for episode $episode" }
                     insertFile(episode, it.path!!)
                 }
             } else {
+                log.info { "Registering file ${it.path} for episode $episode" }
                 insertFile(episode, it.path!!)
             }
+        }
+
+        DataManagerFactory.showDao.getAll().forEach {
+            registerAllEpisodes(it.imdbId)
         }
     }
 

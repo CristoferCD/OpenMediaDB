@@ -43,7 +43,7 @@ class ShowController : BaseController() {
 
     @GetMapping("/find")
     fun find(@RequestParam("q") query: String): PagedResponse<Show> {
-        TODO("Implement fuzzy string search to all entries on db")
+        return PagedResponse(DataManagerFactory.showDao.find(query), 0, 0, 0)
     }
 
     @GetMapping("/{id}")

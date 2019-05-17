@@ -128,8 +128,8 @@ class ShowDao(override val dbConnection: Database) : IBaseDao<Show, String> {
             } else {
                 ShowTable.slice(ShowTable.name).selectAll()
                         .map { it[ShowTable.name] to it[ShowTable.name].diceCoefficient(name) }
-                        .filter { it.second > 0.7 }.maxBy { it.second }
-                        ?.let { bestMatch ->
+                        .filter { it.second > 0.7 }.sortedByDescending { it.second }
+                        .forEach { bestMatch ->
                             (ShowTable innerJoin ExternalIdsTable).select {
                                 ShowTable.name eq bestMatch.first
                             }.forEach {
