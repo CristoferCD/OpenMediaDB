@@ -50,7 +50,7 @@ internal object LibraryManager {
             log.info { "Registering episode $it" }
             val existingEpisode = DataManagerFactory.videoDao.findFromParent(showId, it.season, it.episodeNumber)
             if (existingEpisode.size == 1) {
-                DataManagerFactory.videoDao.update(it.copy(id = existingEpisode.first().id))
+                DataManagerFactory.videoDao.update(it.copy(id = existingEpisode.first().id, fileId = existingEpisode.first().fileId))
             } else {
                 createEpisodeEntry(it)
             }
