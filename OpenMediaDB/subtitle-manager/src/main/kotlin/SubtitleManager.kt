@@ -1,3 +1,5 @@
+import data.Subtitle
+import mu.KotlinLogging
 import org.jsoup.Jsoup
 import java.io.File
 import java.io.FileInputStream
@@ -10,6 +12,7 @@ import java.util.zip.ZipInputStream
 
 
 object SubtitleManager {
+    private val log = KotlinLogging.logger {}
     private const val baseUrl = "https://www.subdivx.com"
 
     fun search(show: String, season: Int?, episode: Int?): List<Subtitle> {
@@ -19,7 +22,11 @@ object SubtitleManager {
             episodeStr += "E" + if (episode < 10) "0$episode" else episode
         }
 
-        val doc = Jsoup.connect("$baseUrl/index.php?buscar=$show $episodeStr&accion=5&masdesc=&subtitulos=1&realiza_b=1").get()
+        val url = "$baseUrl/index.php?buscar=$show $episodeStr&accion=5&masdesc=&subtitulos=1&realiza_b=1"
+
+        log.debug { "Searching subtitle in: $url" }
+
+        val doc = Jsoup.connect(url).get()
 
         val subtitles = mutableListOf<Subtitle>()
 
@@ -37,17 +44,17 @@ object SubtitleManager {
         return subtitles
     }
 
-    fun download(subtitle: Subtitle): Path {
+    fun download(subtitle: Subtitle): List<Path> {
         val doc = Jsoup.connect(subtitle.url).get()
         val link = doc.select("#detalle_datos .link1")?.first()?.attr("href")
         println("Link: $link")
         val file = Files.createTempFile(subtitle.title, ".zip")
         Files.copy(URL(link).openStream(), file, StandardCopyOption.REPLACE_EXISTING)
-        unzip(file)
-        return file.toAbsolutePath()
+        return unzip(file)
     }
 
-    private fun unzip(path: Path) {
+    private fun unzip(path: Path): List<Path> {
+        val extractedFiles = mutableListOf<Path>()
         val destDir = Files.createTempDirectory("omediadb-subs")
         val zis = ZipInputStream(FileInputStream(path.toFile()))
         var zipEntry: ZipEntry? = zis.nextEntry
@@ -55,10 +62,10 @@ object SubtitleManager {
             val newFile = File(destDir.toFile(), zipEntry.name)
             Files.copy(zis, newFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
             zipEntry = zis.nextEntry
+            extractedFiles.add(newFile.toPath())
         }
         zis.closeEntry()
         zis.close()
+        return extractedFiles
     }
 }
-
-data class Subtitle(var title: String = "", var description: String = "", var url: String = "")
