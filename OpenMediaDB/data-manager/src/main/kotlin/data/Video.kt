@@ -10,7 +10,7 @@ data class Video (
         var name: String,
         var season: Int,
         var episodeNumber: Int,
-        var seen: Boolean = false,
+        var seen: Boolean? = null,
         var airDate: LocalDate = LocalDate.of(1970, 1, 1),
         var sinopsis: String,
         var imgPoster: String?,

@@ -1,6 +1,7 @@
 package app.controller
 
 import DataManagerFactory
+import SubtitleManager
 import data.Subtitle
 import data.Video
 import data.request.BooleanActionRB
@@ -40,11 +41,11 @@ class EpisodeController : BaseController() {
         }
     }
 
-        @PostMapping("/{id}/seen")
-        fun markSeen(@PathVariable id: Int, @RequestBody booleanAction: BooleanActionRB): Boolean {
-            val user = getAuthenticatedUser()
-                    ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not logged in")
-            DataManagerFactory.videoDao.markWatched(booleanAction.actionValue, user, id)
-            return booleanAction.actionValue
-        }
+    @PostMapping("/{id}/seen")
+    fun markSeen(@PathVariable id: Int, @RequestBody booleanAction: BooleanActionRB): Boolean {
+        val user = getAuthenticatedUser()
+                ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not logged in")
+        DataManagerFactory.videoDao.markWatched(booleanAction.actionValue, user, id)
+        return booleanAction.actionValue
     }
+}

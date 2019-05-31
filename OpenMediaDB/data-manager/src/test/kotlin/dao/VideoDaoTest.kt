@@ -3,11 +3,15 @@ package dao
 import DataManagerFactory
 import data.ExternalIds
 import data.Show
+import data.User
 import data.Video
 import exceptions.ExistingEntityException
+import mu.KotlinLogging
 import org.junit.Test
+import kotlin.test.assertEquals
 
 class VideoDaoTest {
+    private val log = KotlinLogging.logger {}
 
     @Test
     fun get() {
@@ -57,5 +61,25 @@ class VideoDaoTest {
         val video = DataManagerFactory.videoDao.get(1)
         video!!.fileId = 23
         DataManagerFactory.videoDao.update(video)
+    }
+
+    @Test
+    fun markWatched() {
+        val user = try {
+            val userId = DataManagerFactory.userDao.insert(User(null, "test", "test"))
+            DataManagerFactory.userDao.get(userId)
+        } catch (e: ExistingEntityException) {
+            DataManagerFactory.userDao.getAll().first()
+        }
+
+        val videoId = DataManagerFactory.videoDao.getAll().first().id
+        val video = DataManagerFactory.videoDao.get(videoId!!, user?.id!!)
+        val seen = video?.seen!!
+        log.debug { "Previous state of ${video.id} - ${video.name}: $seen" }
+        DataManagerFactory.videoDao.markWatched(!seen, user.id!!, video.id!!)
+        val updatedVideo = DataManagerFactory.videoDao.get(video.id!!, user.id!!)
+        log.debug { "After changing: ${updatedVideo?.seen}" }
+
+        assertEquals(!seen, updatedVideo?.seen, "Seen property not changed")
     }
 }

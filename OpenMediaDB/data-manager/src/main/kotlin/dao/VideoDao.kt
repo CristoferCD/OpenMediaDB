@@ -24,6 +24,18 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
         return video
     }
 
+    fun get(key: Int, userId: Int): Video? {
+        var video: Video? = null
+        transaction(dbConnection) {
+            ((VideoTable innerJoin ExternalIdsTable) leftJoin SeenTable)
+                    .select { VideoTable.id eq key and (SeenTable.userId eq userId) }
+                            .limit(1).firstOrNull()?.let {
+                        video = toVideo(it)
+                    }
+        }
+        return video
+    }
+
     fun get(imdbId: String): Video? {
         var video: Video? = null
         transaction(dbConnection) {
@@ -107,7 +119,9 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
                     it[SeenTable.seen] = watched
                 }
             } else {
-                existingEntry[SeenTable.seen] = watched
+                SeenTable.update({SeenTable.id eq existingEntry[SeenTable.id]}) {
+                    it[SeenTable.seen] = watched
+                }
             }
         }
     }
@@ -133,7 +147,7 @@ class VideoDao(override val dbConnection: Database) : IBaseDao<Video, Int> {
             }
             userId?.let {
                 query.adjustColumnSet {
-                    join(SeenTable, joinType = JoinType.LEFT, additionalConstraint = {SeenTable. userId eq userId })
+                    join(SeenTable, joinType = JoinType.LEFT, additionalConstraint = {SeenTable.userId eq userId })
                 }
             }
             query.forEach {
