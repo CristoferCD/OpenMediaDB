@@ -2,7 +2,7 @@ package dao
 
 import org.jetbrains.exposed.sql.Database
 
-interface IBaseDao<T, K> {
+interface IBaseManager<T, K> {
     val dbConnection: Database
 
     fun get(key: K): T?

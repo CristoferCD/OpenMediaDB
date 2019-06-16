@@ -5,7 +5,6 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.sql.Connection
-import javax.xml.crypto.Data
 
 object DataManagerFactory {
     private val dbConnection: Database by lazy {
@@ -13,11 +12,11 @@ object DataManagerFactory {
     }
     private const val dbName = "OpenMedia.db"
 
-    val fileInfoDao by lazy { FileInfoDao(dbConnection) }
-    val showDao by lazy { ShowDao(dbConnection) }
-    val userDao by lazy { UserDao(dbConnection) }
-    val videoDao by lazy { VideoDao(dbConnection) }
-    val tokenDao by lazy { VideoTokenDao(dbConnection) }
+    val fileInfoDao by lazy { FileInfoManager(dbConnection) }
+    val showDao by lazy { ShowManager(dbConnection) }
+    val userDao by lazy { UserManager(dbConnection) }
+    val videoDao by lazy { VideoManager(dbConnection) }
+    val tokenDao by lazy { VideoTokenManager(dbConnection) }
 
 
     private fun createDB(): Database {
