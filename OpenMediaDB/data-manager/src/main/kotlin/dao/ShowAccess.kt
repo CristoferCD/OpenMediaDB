@@ -51,8 +51,8 @@ class ShowManager(override val dbConnection: Database) : IBaseManager<Show, Stri
     }
 
     override fun insert(obj: Show): String {
-        return transaction(dbConnection) {
-            try {
+        return try {
+            transaction(dbConnection) {
                 val extId = ExternalIdsDao.new {
                     imdbId = obj.imdbId
                     tmdbId = obj.externalIds.tmdb
@@ -69,11 +69,11 @@ class ShowManager(override val dbConnection: Database) : IBaseManager<Show, Stri
                     path = obj.path
                     externalIds = extId
                 }.id.value
-            } catch (e: ExposedSQLException) {
-                if (e.toString().contains(Regex("\\[SQLITE_CONSTRAINT\\].*UNIQUE")))
-                    throw ExistingEntityException("ShowTable", obj.imdbId, e)
-                else throw e
             }
+        } catch (e: ExposedSQLException) {
+            if (e.toString().contains(Regex("\\[SQLITE_CONSTRAINT.*UNIQUE")))
+                throw ExistingEntityException("ShowTable", obj.imdbId, e)
+            else throw e
         }
     }
 

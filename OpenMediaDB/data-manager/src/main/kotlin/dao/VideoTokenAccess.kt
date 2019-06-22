@@ -45,12 +45,12 @@ class VideoTokenManager(override val dbConnection: Database) : IBaseManager<Vide
         return transaction(dbConnection) {
             try {
                 VideoTokenDao.new {
-                    file = FileInfoDao[obj.fileId!!]
+                    file = FileInfoDao[obj.fileId]
                     token = obj.token
                     expires = DateTime(obj.expires.toInstant().toEpochMilli())
                 }.id.value
             } catch (e: ExposedSQLException) {
-                if (e.toString().contains(Regex("\\[SQLITE_CONSTRAINT\\].*UNIQUE")))
+                if (e.toString().contains(Regex("\\[SQLITE_CONSTRAINT.*UNIQUE")))
                     throw ExistingEntityException("VideoTokenTable", obj.token, e)
                 else throw e
             }

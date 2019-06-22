@@ -1,13 +1,11 @@
 package dao
 
 import DataManagerFactory
-import data.ExternalIds
-import data.Show
-import data.User
-import data.Video
+import data.*
 import exceptions.ExistingEntityException
 import mu.KotlinLogging
 import org.junit.Test
+import java.nio.file.Files
 import kotlin.test.assertEquals
 
 class VideoDaoTest {
@@ -31,6 +29,8 @@ class VideoDaoTest {
             ))
         } catch (e: ExistingEntityException) {
             println("Test show already exists ${e.message}")
+        } catch (e: Exception) {
+            println("dddd")
         }
         try {
             DataManagerFactory.videoDao.insert(Video(
@@ -59,7 +59,16 @@ class VideoDaoTest {
     @Test
     fun update() {
         val video = DataManagerFactory.videoDao.get(1)
-        video!!.fileId = 23
+        val testFile = Files.createTempFile("test", "")
+        val fileId = DataManagerFactory.fileInfoDao.insert(FileInfo(
+                id = null,
+                path = testFile,
+                resolution = "",
+                bitrate = "",
+                codec = "",
+                duration = 22
+        ))
+        video!!.fileId = fileId
         DataManagerFactory.videoDao.update(video)
     }
 

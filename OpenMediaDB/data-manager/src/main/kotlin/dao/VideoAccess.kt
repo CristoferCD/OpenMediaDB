@@ -1,6 +1,5 @@
 package dao
 
-import data.ExternalIds
 import data.Video
 import data.tables.ExternalIdsTable
 import data.tables.SeenTable
@@ -28,6 +27,7 @@ internal class VideoDao(id: EntityID<Int>) : IntEntity(id) {
     var sinopsis by VideoTable.sinopsis
     var imgPoster by VideoTable.imgPoster
     var externalIds by ExternalIdsDao referencedOn VideoTable.externalIds
+    val seen by SeenDao referrersOn SeenTable.videoId
 
     fun toDataClass() = Video(
             id = id.value,
@@ -39,6 +39,7 @@ internal class VideoDao(id: EntityID<Int>) : IntEntity(id) {
             airDate = airDate.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
             episodeNumber = episodeNumber,
             sinopsis = sinopsis,
+            seen = seen.firstOrNull()?.seen,
             imgPoster = imgPoster,
             externalIds = externalIds.toDataClass()
     )
@@ -50,9 +51,9 @@ class VideoManager(override val dbConnection: Database) : IBaseManager<Video, In
     }
 
     fun get(key: Int, userId: Int) = transaction(dbConnection) {
-        VideoDao.find {
-            (VideoTable.id eq key) and (SeenTable.userId eq userId)
-        }.firstOrNull()?.toDataClass()
+        val video = VideoDao.findById(key)
+        val seen = video?.seen?.find { it.user.id.value == userId }?.seen
+        video?.toDataClass()?.copy(seen = seen)
     }
 
     fun get(imdbId: String) = transaction(dbConnection) {
@@ -85,7 +86,7 @@ class VideoManager(override val dbConnection: Database) : IBaseManager<Video, In
                     externalIds = extId
                 }.id.value
             } catch (e: ExposedSQLException) {
-                if (e.toString().contains(Regex("\\[SQLITE_CONSTRAINT\\].*UNIQUE")))
+                if (e.toString().contains(Regex("\\[SQLITE_CONSTRAINT.*UNIQUE")))
                     throw ExistingEntityException("VideoTable", obj.imdbId ?: "null", e)
                 else throw e
             }
@@ -135,8 +136,7 @@ class VideoManager(override val dbConnection: Database) : IBaseManager<Video, In
     }
 
     fun findFromParent(showId: String, season: Int? = null, episode: Int? = null, userId: Int? = null): List<Video> {
-        val found = mutableListOf<Video>()
-        transaction(dbConnection) {
+        return transaction(dbConnection) {
             val query = (VideoTable innerJoin ExternalIdsTable).select { VideoTable.showId eq showId }
             season?.let {
                 query.andWhere { VideoTable.season eq season }
@@ -149,37 +149,7 @@ class VideoManager(override val dbConnection: Database) : IBaseManager<Video, In
                     join(SeenTable, joinType = JoinType.LEFT, additionalConstraint = { SeenTable.userId eq userId })
                 }
             }
-            query.forEach {
-                found.add(toVideo(it))
-            }
+            VideoDao.wrapRows(query).map(VideoDao::toDataClass)
         }
-        return found
-    }
-
-    private fun toVideo(data: ResultRow): Video {
-        return Video(
-                id = data[VideoTable.id].value,
-                fileId = data[VideoTable.fileId]?.value,
-                showId = data[VideoTable.showId].value,
-                imdbId = data[VideoTable.imdbId],
-                name = data[VideoTable.name],
-                seen = data.getOrNull(SeenTable.seen) ?: false,
-                season = data[VideoTable.season],
-                airDate = data[VideoTable.airDate].toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
-                episodeNumber = data[VideoTable.episodeNumber],
-                sinopsis = data[VideoTable.sinopsis],
-                imgPoster = data[VideoTable.imgPoster],
-                externalIds = toExternalIds(data)
-        )
-    }
-
-    private fun toExternalIds(data: ResultRow): ExternalIds {
-        return ExternalIds(
-                id = data[ExternalIdsTable.id].value,
-                imdb = data[ExternalIdsTable.imdbId],
-                trakt = data[ExternalIdsTable.traktId],
-                tmdb = data[ExternalIdsTable.tmdbId],
-                tvdb = data[ExternalIdsTable.tvdbId]
-        )
     }
 }
