@@ -146,7 +146,8 @@ class VideoManager(override val dbConnection: Database) : IBaseManager<Video, In
             }
             userId?.let {
                 query.adjustColumnSet {
-                    join(SeenTable, joinType = JoinType.LEFT, additionalConstraint = { SeenTable.userId eq userId })
+                    join(SeenTable, joinType = JoinType.LEFT,
+                            additionalConstraint = { (VideoTable.id eq SeenTable.videoId) and (SeenTable.userId eq userId) })
                 }
             }
             VideoDao.wrapRows(query).map(VideoDao::toDataClass)
