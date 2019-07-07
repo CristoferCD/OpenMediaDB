@@ -1,42 +1,39 @@
 package dao
 
+import ConnectionInfo
 import DataManagerFactory
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.Test
 import org.testcontainers.containers.GenericContainer
-import org.testcontainers.images.builder.ImageFromDockerfile
-import java.nio.file.Paths
-import java.util.concurrent.Future
-import java.util.concurrent.TimeUnit
+import org.testcontainers.containers.wait.strategy.Wait
+import java.time.LocalTime
 
 internal class ShowDaoTest {
 
     @Test
     fun find() {
-        val test = DataManagerFactory.showDao.getAll()
+        val fact = DataManagerFactory()
+        val test = fact.showDao.getAll()
         println(test)
-        val result = DataManagerFactory.showDao.find("tt3949232")
+        val result = fact.showDao.find("tt3949232")
         println(result)
         assert(true)
     }
 
     @Test
     fun container() {
-        val container = KGenericContainer("local/omediapostgres")
+        val container = KGenericContainer("local/omediapostgres").waitingFor(Wait.forHealthcheck())
 
         container.start()
 
-        val db = Database.connect("jdbc:postgresql://${container.containerIpAddress}:${container.getMappedPort(5432)}/postgres", user = "omediatest", password = "1234", driver = "org.postgresql.Driver")
+        val url = "jdbc:postgresql://${container.containerIpAddress}:${container.getMappedPort(5432)}/postgres"
+        val user = "omediatest"
+        val pass = "1234"
+        val driver = "org.postgresql.Driver"
+        val fact = DataManagerFactory(ConnectionInfo(url, user, pass, driver))
 
-        transaction(db) {
-            exec("Select * from 'Show'") { rs ->
-                while (rs.next()) {
-                    println(rs.toString())
-                }
-            }
-        }
+        val test = fact.showDao.getAll()
+        println(test)
     }
 }
 
-class KGenericContainer(image: String): GenericContainer<KGenericContainer>(image)
+class KGenericContainer(image: String) : GenericContainer<KGenericContainer>(image)
