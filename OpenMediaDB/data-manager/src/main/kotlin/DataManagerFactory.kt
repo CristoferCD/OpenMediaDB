@@ -18,9 +18,9 @@ class DataManagerFactory(connectionInfo: ConnectionInfo? = null) {
 
     init {
         if (connectionInfo != null) {
-            initConection(connectionInfo)
+            initConnection(connectionInfo)
         } else {
-            createDB()
+            initConnection(ConnectionInfo("jdbc:mariadb://localhost:32770/omedia", "omediauser", "omediauser$", "org.mariadb.jdbc.Driver"))
         }
     }
 
@@ -32,7 +32,7 @@ class DataManagerFactory(connectionInfo: ConnectionInfo? = null) {
         return db
     }
 
-    private fun initConection(con: ConnectionInfo) {
+    private fun initConnection(con: ConnectionInfo) {
         val db = Database.connect(con.url, user = con.username, password = con.password, driver = con.driver)
         updateSchema(db)
         this.dbConnection = db

@@ -1,8 +1,8 @@
-FROM postgres:11.4-alpine
+FROM mariadb:10.1.40-bionic
 
-ENV POSTGRES_USER=omediatest
-ENV POSTGRES_PASSWORD=1234
+ENV MYSQL_DATABASE=omedia
+ENV MYSQL_USER=omediauser
+ENV MYSQL_PASSWORD=omediauser$
+ENV MYSQL_RANDOM_ROOT_PASSWORD=yes
 
-COPY OpenMedia.db.sql /docker-entrypoint-initdb.d/
-
-HEALTHCHECK --interval=5s --timeout=5s --start-period=5s --retries=100 CMD psql -h localhost -p 5432 -U $POSTGRES_USER -v ON_ERROR_STOP=1 -c 'select version()' &> /dev/null
+COPY Omedia_mysql.sql /docker-entrypoint-initdb.d/

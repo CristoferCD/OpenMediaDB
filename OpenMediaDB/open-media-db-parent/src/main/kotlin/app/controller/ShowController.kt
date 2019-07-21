@@ -24,31 +24,31 @@ class ShowController : BaseController() {
 
     @GetMapping
     fun getList(): List<Show> {
-        return DataManagerFactory.showDao.getAll()
+        return dataManagerFactory.showDao.getAll()
     }
 
     @GetMapping("/following")
     fun getFollowing(): List<Show> {
         val user = getAuthenticatedUser() ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not logged in")
-        return DataManagerFactory.showDao.listFollowing(user)
+        return dataManagerFactory.showDao.listFollowing(user)
     }
 
     @PostMapping("/following")
     fun doFollow(@RequestBody booleanAction: BooleanActionRB): Boolean {
         val user = getAuthenticatedUser() ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not logged in")
-        DataManagerFactory.showDao.follow(booleanAction.actionValue, booleanAction.showId, user)
+        dataManagerFactory.showDao.follow(booleanAction.actionValue, booleanAction.showId, user)
         //TODO: check
         return true
     }
 
     @GetMapping("/find")
     fun find(@RequestParam("q") query: String): PagedResponse<Show> {
-        return PagedResponse(DataManagerFactory.showDao.find(query), 0, 0, 0)
+        return PagedResponse(dataManagerFactory.showDao.find(query), 0, 0, 0)
     }
 
     @GetMapping("/{id}")
     fun getShow(@PathVariable id: String): Show {
-        val show = DataManagerFactory.showDao.get(id)
+        val show = dataManagerFactory.showDao.get(id)
         if (show == null) {
             throw ResponseStatusException(HttpStatus.NOT_FOUND, "Show with requested id doesn't exist")
         } else {

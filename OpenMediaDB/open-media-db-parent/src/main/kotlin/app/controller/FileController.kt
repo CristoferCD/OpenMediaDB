@@ -16,11 +16,11 @@ class FileController: BaseController() {
 
     @GetMapping("/{id}")
     fun getFile(@PathVariable id: Int): String {
-        val file = DataManagerFactory.fileInfoDao.get(id)!!
+        val file = dataManagerFactory.fileInfoDao.get(id)!!
         val tokenStr = file.path.toString().sha512Token()
-        val existingToken = DataManagerFactory.tokenDao.get(tokenStr)
+        val existingToken = dataManagerFactory.tokenDao.get(tokenStr)
         return if (existingToken != null) {
-            DataManagerFactory.tokenDao.update(
+            dataManagerFactory.tokenDao.update(
                     existingToken.copy(expires = ZonedDateTime.now().plusDays(1)))
             existingToken.token
         } else {
@@ -29,7 +29,7 @@ class FileController: BaseController() {
                     token = tokenStr,
                     expires = ZonedDateTime.now().plusDays(1)
             )
-            DataManagerFactory.tokenDao.insert(token)
+            dataManagerFactory.tokenDao.insert(token)
             token.token
         }
     }
@@ -84,7 +84,7 @@ class FileController: BaseController() {
 //            val videoInfo = LibraryManager.fileCrawler.parseFileName(nameWithoutExtension)
 //            val show = LibraryManager.getOrCreateShowByName(videoInfo.name)
 //            val path = LibraryManager.fileCrawler.importData(videoInfo, extension, file.bytes)
-//            val fileId = DataManagerFactory.fileInfoDao.insert(FileInfo(
+//            val fileId = dataManagerFactory.fileInfoDao.insert(FileInfo(
 //                    id = null,
 //                    codec = "",
 //                    bitrate = "",
@@ -92,11 +92,11 @@ class FileController: BaseController() {
 //                    duration = null,
 //                    path = path
 //            ))
-//            val videoLocally = DataManagerFactory.videoDao.findFromParent(show.imdbId, videoInfo.season.toInt(), videoInfo.episode.toInt())
+//            val videoLocally = dataManagerFactory.videoDao.findFromParent(show.imdbId, videoInfo.season.toInt(), videoInfo.episode.toInt())
 //            if (videoLocally.isEmpty()) {
 //                val tmdbEpisode = TMDbManager.apiAccess.tvEpisodes.getEpisode(show.externalIds.tmdb!!,
 //                        videoInfo.season.toInt(), videoInfo.episode.toInt(), "en", TmdbTvEpisodes.EpisodeMethod.external_ids)
-//                DataManagerFactory.videoDao.insert(Video(
+//                dataManagerFactory.videoDao.insert(Video(
 //                        id = null,
 //                        showId = show.imdbId,
 //                        imdbId = tmdbEpisode.externalIds.imdbId,
@@ -113,7 +113,7 @@ class FileController: BaseController() {
 //            } else {
 //                val local = videoLocally.first()
 //                local.fileId = fileId
-//                DataManagerFactory.videoDao.update(local)
+//                dataManagerFactory.videoDao.update(local)
 //            }
 //
 //            return "Successfully imported"
@@ -124,7 +124,7 @@ class FileController: BaseController() {
 
     @DeleteMapping("/{id}")
     fun deleteFile(@PathVariable id: Int) {
-        DataManagerFactory.fileInfoDao.delete(id)
+        dataManagerFactory.fileInfoDao.delete(id)
     }
 
     private fun String.sha512Token(): String {
