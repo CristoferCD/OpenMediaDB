@@ -3,15 +3,15 @@ package app.controller
 import DataManagerFactory
 import data.User
 import exceptions.ExistingEntityException
+import io.kotlintest.specs.AbstractAnnotationSpec
 import io.mockk.every
 import io.mockk.spyk
-import org.junit.Test
 
 class EpisodeControllerTest {
 
     private val dataManagerFactory = DataManagerFactory()
 
-    @Test
+    @AbstractAnnotationSpec.Test
     fun listAvailableSubtitles() {
         ShowController().registerShow("tt0944947")
         val episode = dataManagerFactory.videoDao.findFromParent("tt0944947", 8, 6)
@@ -19,7 +19,7 @@ class EpisodeControllerTest {
         println(subs)
     }
 
-    @Test
+    @AbstractAnnotationSpec.Test
     fun findEpisode() {
         val controller = spyk(EpisodeController())
         try {

@@ -52,21 +52,9 @@
             <version>${spring.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <version>${spring.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib-jdk8</artifactId>
             <version>${kotlin.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-test-junit</artifactId>
-            <version>${kotlin.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
@@ -130,16 +118,17 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.intuit.karate</groupId>
-            <artifactId>karate-junit4</artifactId>
-            <version>${karate.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>versions-maven-plugin</artifactId>
             <version>${versionsplugin.version}</version>
+        </dependency><!-- https://mvnrepository.com/artifact/io.kotlintest/kotlintest -->
+        <dependency>
+            <groupId>io.kotlintest</groupId>
+            <artifactId>kotlintest-runner-junit5</artifactId>
+            <version>${kotlintest.version}</version>
+            <scope>test</scope>
         </dependency>
+
         <!-- https://mvnrepository.com/artifact/io.mockk/mockk -->
         <dependency>
             <groupId>io.mockk</groupId>
@@ -223,6 +212,7 @@
         <karate.version>0.9.3</karate.version>
         <versionsplugin.version>2.7</versionsplugin.version>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
+        <kotlintest.version>3.4.0</kotlintest.version>
         <mockk.version>1.9.3</mockk.version>
     </properties>
 

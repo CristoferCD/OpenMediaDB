@@ -6,3 +6,5 @@ ENV MYSQL_PASSWORD=omediauser$
 ENV MYSQL_RANDOM_ROOT_PASSWORD=yes
 
 COPY Omedia_mysql.sql /docker-entrypoint-initdb.d/
+
+HEALTHCHECK CMD mysql --user=$MYSQL_USER --password=$MYSQL_PASSWORD -e "show databases;"
