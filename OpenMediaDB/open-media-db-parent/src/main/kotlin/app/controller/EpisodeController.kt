@@ -11,7 +11,7 @@ import org.springframework.web.server.ResponseStatusException
 
 @RestController
 @RequestMapping("/episodes")
-class EpisodeController : BaseController() {
+internal class EpisodeController : BaseController() {
 
     @GetMapping
     fun findEpisode(@RequestParam("show") showId: String,

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class UserController : BaseController() {
+internal class UserController : BaseController() {
 
     @Autowired
     private lateinit var passwordEncoder: PasswordEncoder

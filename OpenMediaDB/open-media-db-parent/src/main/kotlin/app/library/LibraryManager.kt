@@ -15,7 +15,7 @@ import java.io.File
 import java.nio.file.Path
 
 @Component
-internal object LibraryManager {
+internal class LibraryManager {
     val fileCrawler by lazy { FileCrawler() }
     private val log = KotlinLogging.logger {}
 

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/video")
-class VideoController : BaseController() {
+internal class VideoController : BaseController() {
     @GetMapping("/{token}", produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
     fun streamVideo(@PathVariable token: String): FileSystemResource {
         val videoToken = dataManagerFactory.tokenDao.get(token)!!

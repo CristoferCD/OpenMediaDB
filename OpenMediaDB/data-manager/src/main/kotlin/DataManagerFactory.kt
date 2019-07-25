@@ -4,10 +4,11 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.springframework.stereotype.Component
 import java.sql.Connection
 
+@Component
 class DataManagerFactory(connectionInfo: ConnectionInfo? = null) {
-    private val dbName = "OpenMedia.db"
     private lateinit var dbConnection: Database
 
     val fileInfoDao by lazy { FileInfoManager(dbConnection) }
@@ -20,16 +21,8 @@ class DataManagerFactory(connectionInfo: ConnectionInfo? = null) {
         if (connectionInfo != null) {
             initConnection(connectionInfo)
         } else {
-            initConnection(ConnectionInfo("jdbc:mariadb://localhost:32770/omedia", "omediauser", "omediauser$", "org.mariadb.jdbc.Driver"))
+            initConnection(ConnectionInfo("jdbc:mariadb://localhost:3306/omedia", "omediauser", "omediauser$", "org.mariadb.jdbc.Driver"))
         }
-    }
-
-
-    private fun createDB(): Database {
-        val db = Database.connect("jdbc:sqlite:$dbName", driver = "org.sqlite.JDBC")
-        TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
-        updateSchema(db)
-        return db
     }
 
     private fun initConnection(con: ConnectionInfo) {
