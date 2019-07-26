@@ -7,7 +7,6 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Component
 import java.sql.Connection
 
-@Component
 class DataManagerFactory(connectionInfo: ConnectionInfo? = null) {
     private lateinit var dbConnection: Database
 
