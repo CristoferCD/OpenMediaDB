@@ -3,6 +3,7 @@ package app.config
 import app.filter.JWTAuthenticationFilter
 import app.filter.JWTAuthorizationFilter
 import app.service.UserAuthService
+import DataManagerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod

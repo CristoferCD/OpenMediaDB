@@ -8,6 +8,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 open class Application
 
 fun main(args: Array<String>) {
-    SpringApplication.run(Application::class.java, *args)
-    LibraryManager.refreshLibrary()
+    val context  = SpringApplication.run(Application::class.java, *args)
+    context.getBean(LibraryManager::class.java).refreshLibrary()
 }

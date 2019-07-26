@@ -11,19 +11,36 @@
 
     <artifactId>data-manager</artifactId>
 
-    <dependencies>
-        <!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
-        <dependency>
-            <groupId>org.xerial</groupId>
-            <artifactId>sqlite-jdbc</artifactId>
-            <version>${sqlite.version}</version>
-        </dependency>
+    <properties>
+        <testcontainers.version>1.11.3</testcontainers.version>
+        <mariadb.jdbc.version>2.4.2</mariadb.jdbc.version>
+    </properties>
 
+    <dependencies>
         <dependency>
             <groupId>com.cristcd.open-media-db</groupId>
             <artifactId>common</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>mariadb</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <version>${mariadb.jdbc.version}</version>
+        </dependency>
+
+
     </dependencies>
 
 </project>

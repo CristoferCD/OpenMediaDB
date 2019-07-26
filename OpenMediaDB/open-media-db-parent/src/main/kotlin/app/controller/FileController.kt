@@ -1,8 +1,5 @@
 package app.controller
 
-import DataManagerFactory
-import app.library.LibraryManager
-import data.FileInfo
 import data.VideoFileInfo
 import data.VideoToken
 import org.springframework.web.bind.annotation.*
@@ -12,15 +9,15 @@ import java.time.ZonedDateTime
 
 @RestController
 @RequestMapping("/files")
-class FileController: BaseController() {
+internal class FileController : BaseController() {
 
     @GetMapping("/{id}")
     fun getFile(@PathVariable id: Int): String {
-        val file = DataManagerFactory.fileInfoDao.get(id)!!
+        val file = dataManagerFactory.fileInfoDao.get(id)!!
         val tokenStr = file.path.toString().sha512Token()
-        val existingToken = DataManagerFactory.tokenDao.get(tokenStr)
+        val existingToken = dataManagerFactory.tokenDao.get(tokenStr)
         return if (existingToken != null) {
-            DataManagerFactory.tokenDao.update(
+            dataManagerFactory.tokenDao.update(
                     existingToken.copy(expires = ZonedDateTime.now().plusDays(1)))
             existingToken.token
         } else {
@@ -29,7 +26,7 @@ class FileController: BaseController() {
                     token = tokenStr,
                     expires = ZonedDateTime.now().plusDays(1)
             )
-            DataManagerFactory.tokenDao.insert(token)
+            dataManagerFactory.tokenDao.insert(token)
             token.token
         }
     }
@@ -37,17 +34,17 @@ class FileController: BaseController() {
     @PostMapping
     fun uploadFile(@RequestParam showId: String, @RequestParam season: Int, @RequestParam episode: Int, @RequestParam file: MultipartFile): String {
         log.info { "[uploadFile] - showId: $showId, season: $season, episode: $episode, file: ${file.originalFilename}-${file.contentType}" }
-        val show = LibraryManager.getOrCreateShow(showId)
-        val episodeInfo = LibraryManager.getOrCreateEpisode(show, season, episode)
+        val show = libraryManager.getOrCreateShow(showId)
+        val episodeInfo = libraryManager.getOrCreateEpisode(show, season, episode)
         val dotIdx = file.originalFilename!!.lastIndexOf('.')
         val extension = file.originalFilename!!.substring(dotIdx + 1)
-        val path = LibraryManager.fileCrawler.importData(VideoFileInfo(
+        val path = libraryManager.fileCrawler.importData(VideoFileInfo(
                 name = show.name,
                 season = episodeInfo.season.toString(),
                 episode = episodeInfo.episodeNumber.toString(),
                 episodeName = episodeInfo.name
         ), extension, file.inputStream)
-        val fileId = LibraryManager.insertFile(episodeInfo, path)
+        val fileId = libraryManager.insertFile(episodeInfo, path)
         return "Created video with reference $fileId"
     }
 
@@ -81,10 +78,10 @@ class FileController: BaseController() {
 //        val nameWithoutExtension = file.originalFilename!!.substring(0, dotIdx)
 //        val extension = file.originalFilename!!.substring(dotIdx + 1)
 //        try {
-//            val videoInfo = LibraryManager.fileCrawler.parseFileName(nameWithoutExtension)
-//            val show = LibraryManager.getOrCreateShowByName(videoInfo.name)
-//            val path = LibraryManager.fileCrawler.importData(videoInfo, extension, file.bytes)
-//            val fileId = DataManagerFactory.fileInfoDao.insert(FileInfo(
+//            val videoInfo = libraryManager.fileCrawler.parseFileName(nameWithoutExtension)
+//            val show = libraryManager.getOrCreateShowByName(videoInfo.name)
+//            val path = libraryManager.fileCrawler.importData(videoInfo, extension, file.bytes)
+//            val fileId = dataManagerFactory.fileInfoDao.insert(FileInfo(
 //                    id = null,
 //                    codec = "",
 //                    bitrate = "",
@@ -92,11 +89,11 @@ class FileController: BaseController() {
 //                    duration = null,
 //                    path = path
 //            ))
-//            val videoLocally = DataManagerFactory.videoDao.findFromParent(show.imdbId, videoInfo.season.toInt(), videoInfo.episode.toInt())
+//            val videoLocally = dataManagerFactory.videoDao.findFromParent(show.imdbId, videoInfo.season.toInt(), videoInfo.episode.toInt())
 //            if (videoLocally.isEmpty()) {
 //                val tmdbEpisode = TMDbManager.apiAccess.tvEpisodes.getEpisode(show.externalIds.tmdb!!,
 //                        videoInfo.season.toInt(), videoInfo.episode.toInt(), "en", TmdbTvEpisodes.EpisodeMethod.external_ids)
-//                DataManagerFactory.videoDao.insert(Video(
+//                dataManagerFactory.videoDao.insert(Video(
 //                        id = null,
 //                        showId = show.imdbId,
 //                        imdbId = tmdbEpisode.externalIds.imdbId,
@@ -113,7 +110,7 @@ class FileController: BaseController() {
 //            } else {
 //                val local = videoLocally.first()
 //                local.fileId = fileId
-//                DataManagerFactory.videoDao.update(local)
+//                dataManagerFactory.videoDao.update(local)
 //            }
 //
 //            return "Successfully imported"
@@ -124,7 +121,7 @@ class FileController: BaseController() {
 
     @DeleteMapping("/{id}")
     fun deleteFile(@PathVariable id: Int) {
-        DataManagerFactory.fileInfoDao.delete(id)
+        dataManagerFactory.fileInfoDao.delete(id)
     }
 
     private fun String.sha512Token(): String {
