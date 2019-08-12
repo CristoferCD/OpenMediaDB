@@ -31,7 +31,7 @@ class JWTAuthenticationFilter(val authManager: AuthenticationManager): UsernameP
 
     override fun attemptAuthentication(request: HttpServletRequest?, response: HttpServletResponse?): Authentication {
         try {
-            val userCredentials = jacksonObjectMapper().readValue<UserRB>(request?.inputStream, UserRB::class.java)
+            val userCredentials = jacksonObjectMapper().readValue(request?.inputStream, UserRB::class.java)
             return authManager.authenticate(UsernamePasswordAuthenticationToken(userCredentials.name, userCredentials.password))
         } catch (e: Exception) {
             log.error(e) {"Error trying to authenticate request"}
