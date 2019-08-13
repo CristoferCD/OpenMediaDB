@@ -30,3 +30,5 @@ OpenMediaDB/subtitle-manager/target/
 OpenMediaDB/common/target/
 
 OpenMediaDB/data-manager/\.kotlintest/
+
+OpenMediaDB/open-media-db-parent/src/main/resources/tmdb-config\.properties
