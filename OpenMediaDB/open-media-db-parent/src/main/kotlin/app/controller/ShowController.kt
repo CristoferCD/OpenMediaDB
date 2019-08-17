@@ -1,7 +1,6 @@
 package app.controller
 
 import data.Show
-import data.request.BooleanActionRB
 import data.response.PagedResponse
 import data.tmdb.TMDbManager
 import org.springframework.http.HttpStatus
@@ -30,11 +29,11 @@ internal class ShowController : BaseController() {
         return dataManagerFactory.showDao.listFollowing(user)
     }
 
-    @PostMapping("/following")
-    fun doFollow(@RequestBody booleanAction: BooleanActionRB): Boolean {
+    @PostMapping("/{id}/follow")
+    fun doFollow(@PathVariable id: String, @RequestParam value: Boolean): Boolean {
         val user = getAuthenticatedUser()
                 ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not logged in")
-        dataManagerFactory.showDao.follow(booleanAction.actionValue, booleanAction.showId, user)
+        dataManagerFactory.showDao.follow(value, id, user)
         //TODO: check
         return true
     }

@@ -352,37 +352,6 @@
             }
           }
         }
-      },
-      "post": {
-        "tags": [
-          "show"
-        ],
-        "summary": "Follow or unfollow this show",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BooleanAction"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "All followed shows",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Show"
-                  }
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/shows/find": {
@@ -440,6 +409,47 @@
                 "schema": {
                   "type": "object",
                   "$ref": "#/components/schemas/Show"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shows/{id}/follow": {
+      "post": {
+        "tags": [
+          "show"
+        ],
+        "summary": "Follow or unfollow this show",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "value",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All followed shows",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Show"
+                  }
                 }
               }
             }
