@@ -4,8 +4,9 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ResponseBody
-import java.nio.charset.Charset
-import java.nio.file.Files
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.util.stream.Collectors
 
 @Controller
 internal class InfoController : BaseController() {
@@ -18,5 +19,6 @@ internal class InfoController : BaseController() {
 
     @GetMapping("/api/json")
     @ResponseBody
-    fun jsonFile() = String(Files.readAllBytes(apiJson.file.toPath()), Charset.defaultCharset())
+    fun jsonFile() = BufferedReader(InputStreamReader(apiJson.inputStream)).lines()
+            .collect(Collectors.joining(System.lineSeparator()))
 }

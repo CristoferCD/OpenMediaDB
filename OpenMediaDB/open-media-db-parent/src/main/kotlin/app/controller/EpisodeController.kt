@@ -1,10 +1,8 @@
 package app.controller
 
-import DataManagerFactory
 import SubtitleManager
 import data.Subtitle
 import data.Video
-import data.request.BooleanActionRB
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
@@ -42,10 +40,10 @@ internal class EpisodeController : BaseController() {
     }
 
     @PostMapping("/{id}/seen")
-    fun markSeen(@PathVariable id: Int, @RequestBody booleanAction: BooleanActionRB): Boolean {
+    fun markSeen(@PathVariable id: Int, @RequestParam value: Boolean): Boolean {
         val user = getAuthenticatedUser()
                 ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not logged in")
-        dataManagerFactory.videoDao.markWatched(booleanAction.actionValue, user, id)
-        return booleanAction.actionValue
+        dataManagerFactory.videoDao.markWatched(value, user, id)
+        return value
     }
 }
