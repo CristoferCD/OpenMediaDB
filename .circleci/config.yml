@@ -6,6 +6,12 @@ jobs:
     docker:
       - image: circleci/openjdk:8-jdk-stretch
 
+    branches:
+      only:
+        - master
+        - develop
+        - /feature/*
+        
     steps:
       - checkout
 
