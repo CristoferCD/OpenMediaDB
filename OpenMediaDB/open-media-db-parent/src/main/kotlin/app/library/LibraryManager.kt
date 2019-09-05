@@ -87,7 +87,7 @@ internal class LibraryManager {
                 createdShows[it.name] = show
             }
 
-            val episode = getOrCreateEpisode(createdShows[it.name]!!, it.season.toInt(), it.episode.toInt())
+            val episode = getOrCreateEpisode(createdShows[it.name]!!, it.season, it.episode)
             if (episode.fileId != null) {
                 val existingFile = dataManagerFactory.fileInfoDao.get(episode.fileId!!)
                 if (existingFile != null) {

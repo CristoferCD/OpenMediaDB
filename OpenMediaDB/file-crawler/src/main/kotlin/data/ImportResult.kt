@@ -9,8 +9,8 @@ data class ImportResult (
 
 data class VideoFileInfo (
         var name: String,
-        var season: String,
-        var episode: String,
+        var season: Int,
+        var episode: Int,
         var episodeName: String,
         var path: Path? = null
 )

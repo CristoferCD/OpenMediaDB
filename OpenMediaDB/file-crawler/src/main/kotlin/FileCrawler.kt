@@ -24,7 +24,7 @@ class FileCrawler {
             libraryRoot = properties.getProperty("library.root") ?: ""
             directoryPattern = properties.getProperty("pattern.directory") ?: "#(name)/#(season)ª Temp"
             shownamePattern = properties.getProperty("pattern.showname")
-                    ?: "(?<name>.+) (?<season>.+)x(?<episode>.+) - (?<epName>.+)"
+                    ?: "(?<name>.+) (?<season>[0-9]+)x(?<episode>[0-9]+) - (?<epName>.+)"
         }
     }
 
@@ -49,8 +49,8 @@ class FileCrawler {
         val match = Regex(shownamePattern).matchEntire(name)
         if (match != null) {
             return VideoFileInfo(match.groups["name"]!!.value,
-                    match.groups["season"]!!.value,
-                    match.groups["episode"]!!.value,
+                    match.groups["season"]!!.value.toInt(),
+                    match.groups["episode"]!!.value.toInt(),
                     if (shownamePattern.contains("(?<epName>")) match.groups["epName"]!!.value else "")
         }
         throw FileParseException(name, shownamePattern)
@@ -58,7 +58,7 @@ class FileCrawler {
 
     fun importData(info: VideoFileInfo, fileExtension: String, data: InputStream): Path {
         var directoryTarget = directoryPattern.replace("#(name)", info.name.replace("[:/*\"?|<>] ?".toRegex(), " "))
-        directoryTarget = directoryTarget.replace("#(season)", info.season.replace("[:/*\"?|<>] ?".toRegex(), " "))
+        directoryTarget = directoryTarget.replace("#(season)", info.season.toString())
         directoryTarget = directoryTarget.replace("/", File.separator)
         directoryTarget = directoryTarget.replace("\\", File.separator)
         val targetPath = Paths.get(libraryRoot, directoryTarget, "${createCorrectName(info)}.$fileExtension")
@@ -72,7 +72,7 @@ class FileCrawler {
     private fun importFile(from: File, destructive: Boolean): VideoFileInfo {
         val fileInfo = parseFileInfo(from)
         var directoryTarget = directoryPattern.replace("#(name)", fileInfo.name)
-        directoryTarget = directoryTarget.replace("#(season)", fileInfo.season)
+        directoryTarget = directoryTarget.replace("#(season)", if (fileInfo.season < 10) "0${fileInfo.season}" else fileInfo.season.toString())
         directoryTarget = directoryTarget.replace("/", File.separator)
         directoryTarget = directoryTarget.replace("\\", File.separator)
         val targetPath = Paths.get(libraryRoot, directoryTarget, from.name)
@@ -87,8 +87,8 @@ class FileCrawler {
 
     private fun createCorrectName(info: VideoFileInfo): String {
         var name = shownamePattern.replace("(?<name>.+)", info.name)
-        name = name.replace("(?<season>.+)", info.season)
-        name = name.replace("(?<episode>.+)", if (info.episode.toInt() < 10) "0${info.episode}" else info.episode)
+        name = name.replace("(?<season>[0-9]+)", if (info.season < 10) "0${info.season}" else info.season.toString())
+        name = name.replace("(?<episode>[0-9]+)", if (info.episode < 10) "0${info.episode}" else info.episode.toString())
         name = name.replace("(?<epName>.+)", info.episodeName.replace("/", "_"))
         return name.replace("[:/*\"?|<>] ?".toRegex(), " ")
     }

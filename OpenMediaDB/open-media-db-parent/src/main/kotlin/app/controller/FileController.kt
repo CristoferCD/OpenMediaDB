@@ -40,8 +40,8 @@ internal class FileController : BaseController() {
         val extension = file.originalFilename!!.substring(dotIdx + 1)
         val path = libraryManager.fileCrawler.importData(VideoFileInfo(
                 name = show.name,
-                season = episodeInfo.season.toString(),
-                episode = episodeInfo.episodeNumber.toString(),
+                season = episodeInfo.season,
+                episode = episodeInfo.episodeNumber,
                 episodeName = episodeInfo.name
         ), extension, file.inputStream)
         val fileId = libraryManager.insertFile(episodeInfo, path)
