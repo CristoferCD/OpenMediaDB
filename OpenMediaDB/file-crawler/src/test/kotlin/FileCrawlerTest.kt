@@ -1,3 +1,5 @@
+import cucumber.api.java.en.Given
+import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import java.io.File
 
@@ -16,6 +18,16 @@ internal class FileCrawlerTest : StringSpec({
         val crawler = FileCrawler()
         println(crawler.parseFileInfo(file))
         file.delete()
+    }
+
+
+    "file name with -" {
+        val name = "MasterChef 10x16 - NASCAR - Finish Line Feed"
+        val info = FileCrawler().parseFileName(name)
+        info.name shouldBe "MasterChef"
+        info.season shouldBe 10
+        info.episode shouldBe 16
+        info.episodeName shouldBe "NASCAR - Finish Line Feed"
     }
 
     "replaceTest" {

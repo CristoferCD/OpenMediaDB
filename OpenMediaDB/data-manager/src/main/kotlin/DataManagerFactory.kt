@@ -9,6 +9,7 @@ import java.sql.Connection
 
 class DataManagerFactory(connectionInfo: ConnectionInfo? = null) {
     private lateinit var dbConnection: Database
+    private val dbHost = System.getenv("OMEDIADB_HOST") ?: "localhost"
 
     val fileInfoDao by lazy { FileInfoManager(dbConnection) }
     val showDao by lazy { ShowManager(dbConnection) }
@@ -20,7 +21,7 @@ class DataManagerFactory(connectionInfo: ConnectionInfo? = null) {
         if (connectionInfo != null) {
             initConnection(connectionInfo)
         } else {
-            initConnection(ConnectionInfo("jdbc:mariadb://localhost:3306/omedia", "omediauser", "omediauser$", "org.mariadb.jdbc.Driver"))
+            initConnection(ConnectionInfo("jdbc:mariadb://$dbHost:3306/omedia", "omediauser", "omediauser$", "org.mariadb.jdbc.Driver"))
         }
     }
 

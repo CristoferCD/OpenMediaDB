@@ -1,0 +1,44 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/openmediadb
+
+    docker:
+      - image: circleci/openjdk:8-jdk-stretch
+
+    branches:
+      only:
+        - master
+        - develop
+        - /feature/*
+        
+    steps:
+      - checkout
+
+      - restore_cache:
+          key: openmediadb-{{ checksum "pom.xml" }}
+      
+      - run: cd OpenMediaDB && mvn dependency:go-offline
+
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: openmediadb-{{ checksum "pom.xml" }}
+
+      - run: cd OpenMediaDB && mvn package
+
+      - store_test_results:
+          path: /OpenMediaDB/common/target/surefire-reports
+      - store_test_results:
+          path: /OpenMediaDB/data-manager/target/surefire-reports
+      - store_test_results:
+          path: /OpenMediaDB/file-crawler/target/surefire-reports
+      - store_test_results:
+          path: /OpenMediaDB/omdb-api/target/surefire-reports
+      - store_test_results:
+          path: /OpenMediaDB/open-media-db-parent/target/surefire-reports
+      - store_test_results:
+          path: /OpenMediaDB/subtitle-manager/target/surefire-reports
+
+      - store_artifacts:
+          path: /OpenMediaDB/open-media-db-parent/target/open-media-db-parent-1.0-SNAPSHOT.jar

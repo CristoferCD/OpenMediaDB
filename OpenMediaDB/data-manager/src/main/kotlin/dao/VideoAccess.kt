@@ -150,6 +150,7 @@ class VideoManager(override val dbConnection: Database) : IBaseManager<Video, In
                             additionalConstraint = { (VideoTable.id eq SeenTable.videoId) and (SeenTable.userId eq userId) })
                 }
             }
+            query.orderBy(VideoTable.season to SortOrder.ASC, VideoTable.episodeNumber to SortOrder.ASC)
             VideoDao.wrapRows(query).map(VideoDao::toDataClass)
         }
     }

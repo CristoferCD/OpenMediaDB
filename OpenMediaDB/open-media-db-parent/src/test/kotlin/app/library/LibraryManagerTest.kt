@@ -1,10 +1,7 @@
 package app.library
 
 import io.kotlintest.specs.AbstractAnnotationSpec
+import io.kotlintest.specs.BehaviorSpec
 
-class LibraryManagerTest {
-    @AbstractAnnotationSpec.Test
-    fun refreshLibrary() {
-//        LibraryManager().refreshLibrary()
-    }
+class LibraryManagerTest : BehaviorSpec() {
 }
