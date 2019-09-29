@@ -47,6 +47,27 @@
                 </executions>
                 <configuration>
                     <mainClass>app.ApplicationKt</mainClass>
+                    <finalName>${project.parent.build.finalName}</finalName>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>push</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <repository>${docker.repository.name}</repository>
+                    <tag>${buildNumber}</tag>
+                    <buildArgs>
+                        <JAR_FILE>/target/${project.build.finalName}.jar</JAR_FILE>
+                    </buildArgs>
                 </configuration>
             </plugin>
         </plugins>
