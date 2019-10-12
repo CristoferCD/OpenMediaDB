@@ -47,7 +47,6 @@
                 </executions>
                 <configuration>
                     <mainClass>app.ApplicationKt</mainClass>
-                    <finalName>${project.parent.build.finalName}</finalName>
                 </configuration>
             </plugin>
             <plugin>
