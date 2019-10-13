@@ -1,0 +1,741 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Open Media Database",
+    "description": "Open source media server",
+    "version": "1.0",
+    "contact": {
+      "email": "cristofer_cd@outlook.es"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.server.test/v1"
+    }
+  ],
+  "tags": [
+    {
+      "name": "admin",
+      "description": "Administrative actions"
+    },
+    {
+      "name": "episode",
+      "description": ""
+    },
+    {
+      "name": "file",
+      "description": ""
+    },
+    {
+      "name": "movie",
+      "description": ""
+    },
+    {
+      "name": "show",
+      "description": ""
+    },
+    {
+      "name": "user",
+      "description": ""
+    },
+    {
+      "name": "video",
+      "description": ""
+    },
+    {
+      "name": "info",
+      "description": ""
+    }
+  ],
+  "paths": {
+    "/admin/refreshLibrary": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Triggers a full scan of the media directory and refreshes all episode data saved.",
+        "responses": {
+          "200": {
+            "description": "Refresh executed successfully",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/episodes": {
+      "get": {
+        "tags": [
+          "episode"
+        ],
+        "summary": "List episodes",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "show",
+            "description": "Id of the parent show",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "season",
+            "description": "Season to retrieve episodes from",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": "null (all seasons)"
+            }
+          },
+          {
+            "in": "query",
+            "name": "episode",
+            "description": "Specific episode number to get",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": "null (all episodes)"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of episodes found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Video"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/episodes/{id}": {
+      "get": {
+        "tags": [
+          "episode"
+        ],
+        "summary": "Gets specific episode info",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Found episode",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/Video"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Episode not found"
+          }
+        }
+      }
+    },
+    "/episodes/{id}/subtitles": {
+      "get": {
+        "tags": [
+          "episode"
+        ],
+        "summary": "List of available subtitles for the episode.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of subtitles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Subtitle"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/episodes/{id}/seen": {
+      "post": {
+        "tags": [
+          "episode"
+        ],
+        "summary": "Changes watched status of this episode.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "value",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated value",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean",
+                  "example": "true"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/files/{id}": {
+      "get": {
+        "tags": [
+          "file"
+        ],
+        "summary": "Get a token to access the video file.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token to access a video",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/files": {
+      "post": {
+        "tags": [
+          "file"
+        ],
+        "summary": "Uploads a new file",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "showId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "season",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "episode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "file",
+            "required": true,
+            "schema": {
+              "type": "multipart"
+            }
+          }
+        ]
+      }
+    },
+    "/shows": {
+      "get": {
+        "tags": [
+          "show"
+        ],
+        "summary": "List all shows",
+        "responses": {
+          "200": {
+            "description": "List of all shows registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/Show"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "show"
+        ],
+        "summary": "Register new show",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "imdbId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/shows/following": {
+      "get": {
+        "tags": [
+          "show"
+        ],
+        "summary": "List all shows currently being follows by the logged user.",
+        "responses": {
+          "200": {
+            "description": "All followed shows",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Show"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shows/find": {
+      "get": {
+        "tags": [
+          "show"
+        ],
+        "summary": "Searches by name on the local database.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paged results of the search",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/PagedShow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shows/{id}": {
+      "get": {
+        "tags": [
+          "show"
+        ],
+        "summary": "Get specific show info",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Show info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/Show"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shows/{id}/follow": {
+      "post": {
+        "tags": [
+          "show"
+        ],
+        "summary": "Follow or unfollow this show",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "value",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All followed shows",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Show"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/search": {
+      "get": {
+        "tags": [
+          "show"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paged results of the search",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/PagedShow"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRB"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/signup": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRB"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/video/{token}": {
+      "get": {
+        "tags": [
+          "video"
+        ],
+        "responses": {
+          "200": {
+            "description": "The video stream requested",
+            "content": {
+              "application/octet-stream": {
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api": {
+      "get": {
+        "tags": [
+          "info"
+        ],
+        "summary": "This page",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "text/html": {
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/json": {
+      "get": {
+        "tags": [
+          "info"
+        ],
+        "summary": "Open api description file",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Show": {
+        "type": "object",
+        "properties": {
+          "imdbId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sinopsis": {
+            "type": "string"
+          },
+          "totalSeasons": {
+            "type": "integer"
+          },
+          "totalEpisodes": {
+            "type": "integer"
+          },
+          "imgPoster": {
+            "type": "string"
+          },
+          "imgBackground": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "externalIds": {
+            "$ref": "#/components/schemas/ExternalIds"
+          }
+        }
+      },
+      "Video": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int/nullable"
+          },
+          "fileId": {
+            "type": "integer",
+            "format": "int/nullable"
+          },
+          "showId": {
+            "type": "string"
+          },
+          "imdbId": {
+            "type": "string",
+            "format": "string/nullable"
+          },
+          "name": {
+            "type": "string"
+          },
+          "season": {
+            "type": "integer"
+          },
+          "episodeNumber": {
+            "type": "integer"
+          },
+          "seen": {
+            "type": "boolean"
+          },
+          "airDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "sinopsis": {
+            "type": "string"
+          },
+          "imgPoster": {
+            "type": "string",
+            "format": "url"
+          },
+          "externalIds": {
+            "$ref": "#/components/schemas/ExternalIds"
+          }
+        }
+      },
+      "ExternalIds": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "imdb": {
+            "type": "string"
+          },
+          "tmdb": {
+            "type": "string"
+          },
+          "trakt": {
+            "type": "string"
+          },
+          "tvdb": {
+            "type": "string"
+          }
+        }
+      },
+      "Subtitle": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "BooleanAction": {
+        "type": "object",
+        "properties": {
+          "showId": {
+            "type": "string"
+          },
+          "actionValue": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PagedShow": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Show"
+            }
+          },
+          "totalResults": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "totalPages": {
+            "type": "integer"
+          }
+        }
+      },
+      "UserRB": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -28,3 +28,17 @@ OpenMediaDB/subtitle-manager/target/
 \.scannerwork/
 
 OpenMediaDB/common/target/
+
+OpenMediaDB/data-manager/\.kotlintest/
+
+OpenMediaDB/open-media-db-parent/src/main/resources/tmdb-config\.properties
+
+OpenMediaDB/common/.kotlintest/
+
+OpenMediaDB/file-crawler/.kotlintest/
+
+OpenMediaDB/omdb-api/.kotlintest/
+
+OpenMediaDB/open-media-db-parent/.kotlintest/
+
+OpenMediaDB/subtitle-manager/.kotlintest/

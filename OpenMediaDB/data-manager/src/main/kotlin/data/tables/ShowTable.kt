@@ -13,5 +13,5 @@ internal object ShowTable : IdTable<String>("Show") {
     val imgBackground = text("imgBackground").nullable()
     val path = text("path")
     val externalIds = reference("externalIds", ExternalIdsTable,
-            onUpdate = ReferenceOption.CASCADE, onDelete = ReferenceOption.SET_NULL)
+            onUpdate = ReferenceOption.CASCADE, onDelete = ReferenceOption.CASCADE)
 }

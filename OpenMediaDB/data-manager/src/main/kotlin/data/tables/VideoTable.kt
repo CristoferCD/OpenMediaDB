@@ -16,5 +16,5 @@ internal object VideoTable : IntIdTable("Video") {
     val sinopsis = text("sinopsis")
     val imgPoster = text("imgPoster").nullable()
     val externalIds = reference("externalIds", ExternalIdsTable,
-            onUpdate = ReferenceOption.CASCADE, onDelete = ReferenceOption.SET_NULL)
+            onUpdate = ReferenceOption.CASCADE, onDelete = ReferenceOption.CASCADE)
 }

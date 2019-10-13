@@ -3,6 +3,7 @@ package app.config
 import app.filter.JWTAuthenticationFilter
 import app.filter.JWTAuthorizationFilter
 import app.service.UserAuthService
+import DataManagerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -28,7 +29,7 @@ open class SecurityConfig(private val userAuthService: UserAuthService) : WebSec
 
     override fun configure(http: HttpSecurity?) {
         http!!.cors().and().csrf().disable().authorizeRequests()
-                .antMatchers("/login", "/signup", "/video/*").permitAll()
+                .antMatchers("/login", "/signup", "/video/*", "/api", "/api/json").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(JWTAuthenticationFilter(authenticationManager()))

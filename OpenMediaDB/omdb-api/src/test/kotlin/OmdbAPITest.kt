@@ -1,33 +1,24 @@
-import data.ImdbTitle
 import data.ResultType
-import org.junit.Test
-import kotlin.test.assertEquals
+import io.kotlintest.matchers.boolean.shouldBeTrue
+import io.kotlintest.shouldBe
+import io.kotlintest.specs.StringSpec
 
-class OmdbAPITest {
-
-    @Test
-    fun byId() {
+class OmdbAPITest: StringSpec({
+    "byId" {
         val result = OmdbAPI.getById("tt0120737")
-        assertEquals("The Lord of the Rings: The Fellowship of the Ring", result.title)
-        assertEquals("tt0120737", result.imdbId)
+        "The Lord of the Rings: The Fellowship of the Ring" shouldBe result.title
+        "tt0120737" shouldBe result.imdbId
     }
-
-    @Test
-    fun byIdError() {
+    "byIdError" {
         val result = OmdbAPI.getById("wrong_id")
-        assert(result.responseSuccessful == "False")
+        result.responseSuccessful shouldBe "False"
     }
-
-    @Test
-    fun search() {
+    "search" {
         val result = OmdbAPI.search("the flash")
-        assert(result.results.any { it.title == "The Flash" })
+        result.results.any { it.title == "The Flash" }.shouldBeTrue()
     }
-
-    @Test
-    fun getEpisode() {
+    "getEpisode" {
         val result = OmdbAPI.getByTitle("the flash", ResultType.EPISODE, season = 1, episode = 1)
         println(result)
     }
-
-}
+})

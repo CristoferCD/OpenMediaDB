@@ -52,7 +52,7 @@ class VideoManager(override val dbConnection: Database) : IBaseManager<Video, In
 
     fun get(key: Int, userId: Int) = transaction(dbConnection) {
         val video = VideoDao.findById(key)
-        val seen = video?.seen?.find { it.user.id.value == userId }?.seen
+        val seen = video?.seen?.find { it.user.id.value == userId }?.seen ?: false
         video?.toDataClass()?.copy(seen = seen)
     }
 
@@ -150,6 +150,7 @@ class VideoManager(override val dbConnection: Database) : IBaseManager<Video, In
                             additionalConstraint = { (VideoTable.id eq SeenTable.videoId) and (SeenTable.userId eq userId) })
                 }
             }
+            query.orderBy(VideoTable.season to SortOrder.ASC, VideoTable.episodeNumber to SortOrder.ASC)
             VideoDao.wrapRows(query).map(VideoDao::toDataClass)
         }
     }
