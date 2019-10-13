@@ -2,6 +2,8 @@ package app.filter
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.auth0.jwt.exceptions.TokenExpiredException
+import data.response.TokenExpiredResponse
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
@@ -10,7 +12,7 @@ import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class JWTAuthorizationFilter(authManager: AuthenticationManager): BasicAuthenticationFilter(authManager) {
+class JWTAuthorizationFilter(authManager: AuthenticationManager) : BasicAuthenticationFilter(authManager) {
 
     //TODO: same properties as the other filter
     private val tokenPrefix = "Bearer "
@@ -18,13 +20,22 @@ class JWTAuthorizationFilter(authManager: AuthenticationManager): BasicAuthentic
     private val header = "Authorization"
 
     override fun doFilterInternal(request: HttpServletRequest?, response: HttpServletResponse?, chain: FilterChain?) {
-        if (request?.getHeader(header)?.startsWith(tokenPrefix) == true) {
-            val authentication = getAuthentication(request)
-            SecurityContextHolder.getContext().authentication = authentication
-            chain?.doFilter(request, response)
-        } else {
-            chain?.doFilter(request, response)
-            return
+        try {
+            if (request?.getHeader(header)?.startsWith(tokenPrefix) == true) {
+                val authentication = getAuthentication(request)
+                SecurityContextHolder.getContext().authentication = authentication
+                chain?.doFilter(request, response)
+            } else {
+                chain?.doFilter(request, response)
+                return
+            }
+        } catch (ex: TokenExpiredException) {
+            val error = TokenExpiredResponse("Token expired", ex.message ?: "")
+            response?.status = 403
+            response?.contentType = "application/json"
+            response?.outputStream.use {
+                it?.write(error.json())
+            }
         }
     }
 
