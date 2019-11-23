@@ -14,4 +14,7 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Maven
+      env: 
+        OPENMEDIADB_OMDB_API: ${{ secrets.OPENMEDIADB_OMDB_API }}
+        OPENMEDIADB_TMDB_API: ${{ secrets.OPENMEDIADB_TMDB_API }}
       run: mvn clean install --file OpenMediaDB/pom.xml
