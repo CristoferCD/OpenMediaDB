@@ -10,13 +10,13 @@ jobs:
       only:
         - master
         - develop
-        - /feature/*
+        - /feature/.*
         
     steps:
       - checkout
 
       - restore_cache:
-          key: openmediadb-{{ checksum "pom.xml" }}
+          key: openmediadb-{{ checksum "OpenMediaDB/pom.xml" }}
       
       - run: cd OpenMediaDB && mvn dependency:go-offline
 
@@ -25,7 +25,7 @@ jobs:
             - ~/.m2
           key: openmediadb-{{ checksum "OpenMediaDB/pom.xml" }}
 
-      - run: cd OpenMediaDB && mvn package
+      - run: cd OpenMediaDB && mvn clean install
 
       - store_test_results:
           path: /OpenMediaDB/common/target/surefire-reports
