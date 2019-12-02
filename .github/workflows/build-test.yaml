@@ -26,3 +26,4 @@ jobs:
       uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./OpenMediaDB/test-report/target/site/jacoco-aggregate/jacoco.xml
