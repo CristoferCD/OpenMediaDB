@@ -69,22 +69,6 @@ class FileCrawler {
         return targetPath
     }
 
-    private fun importFile(from: File, destructive: Boolean): VideoFileInfo {
-        val fileInfo = parseFileInfo(from)
-        var directoryTarget = directoryPattern.replace("#(name)", fileInfo.name)
-        directoryTarget = directoryTarget.replace("#(season)", if (fileInfo.season < 10) "0${fileInfo.season}" else fileInfo.season.toString())
-        directoryTarget = directoryTarget.replace("/", File.separator)
-        directoryTarget = directoryTarget.replace("\\", File.separator)
-        val targetPath = Paths.get(libraryRoot, directoryTarget, from.name)
-        if (!Files.exists(targetPath)) Files.createDirectories(targetPath)
-        if (destructive)
-            Files.move(from.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING)
-        else
-            Files.copy(from.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING)
-        fileInfo.path = targetPath
-        return fileInfo
-    }
-
     private fun createCorrectName(info: VideoFileInfo): String {
         var name = shownamePattern.replace("(?<name>.+)", info.name)
         name = name.replace("(?<season>[0-9]+)", if (info.season < 10) "0${info.season}" else info.season.toString())

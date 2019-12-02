@@ -23,7 +23,7 @@ jobs:
       - save_cache:
           paths:
             - ~/.m2
-          key: openmediadb-{{ checksum "pom.xml" }}
+          key: openmediadb-{{ checksum "OpenMediaDB/pom.xml" }}
 
       - run: cd OpenMediaDB && mvn package
 
