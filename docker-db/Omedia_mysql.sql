@@ -1,4 +1,4 @@
-create or replace schema omedia collate latin1_swedish_ci;
+create or replace schema omedia collate 'utf8mb4_general_ci';
 
 use omedia;
 
@@ -10,7 +10,7 @@ create or replace table ExternalIds
 	tmdbId int null,
 	traktId int null,
 	tvdbId int null
-);
+) character set 'utf8mb4' collate 'utf8mb4_general_ci';
 
 create or replace table FileInfo
 (
@@ -21,7 +21,7 @@ create or replace table FileInfo
 	resolution varchar(20) not null,
 	bitrate varchar(20) not null,
 	codec varchar(20) not null
-);
+) character set 'utf8mb4' collate 'utf8mb4_general_ci';
 
 create or replace table `Show`
 (
@@ -38,7 +38,7 @@ create or replace table `Show`
 	constraint fk_Show_externalIds_id
 		foreign key (externalIds) references ExternalIds (id)
 			on update cascade on delete cascade
-);
+) character set 'utf8mb4' collate 'utf8mb4_general_ci';
 
 create or replace table User
 (
@@ -48,7 +48,7 @@ create or replace table User
 	password varchar(128) not null,
 	constraint User_name_unique
 		unique (name)
-);
+) character set 'utf8mb4' collate 'utf8mb4_general_ci';
 
 create or replace table Following
 (
@@ -61,7 +61,7 @@ create or replace table Following
 		foreign key (showId) references `Show` (showId),
 	constraint fk_Following_userId_id
 		foreign key (userId) references User (id)
-);
+) character set 'utf8mb4' collate 'utf8mb4_general_ci';
 
 create or replace table NotificationQueue
 (
@@ -72,7 +72,7 @@ create or replace table NotificationQueue
 	`read` tinyint(1) default 0 not null,
 	constraint fk_NotificationQueue_userId_id
 		foreign key (userId) references User (id)
-);
+) character set 'utf8mb4' collate 'utf8mb4_general_ci';
 
 create or replace table Video
 (
@@ -97,7 +97,7 @@ create or replace table Video
 		foreign key (fileId) references FileInfo (id),
 	constraint fk_Video_showId_showId
 		foreign key (showId) references `Show` (showId)
-);
+) character set 'utf8mb4' collate 'utf8mb4_general_ci';
 
 create or replace table Seen
 (
@@ -110,7 +110,7 @@ create or replace table Seen
 		foreign key (userId) references User (id),
 	constraint fk_Seen_videoId_id
 		foreign key (videoId) references Video (id)
-);
+) character set 'utf8mb4' collate 'utf8mb4_general_ci';
 
 create or replace table VideoTokens
 (
@@ -123,4 +123,4 @@ create or replace table VideoTokens
 		unique (token),
 	constraint fk_VideoTokens_fileId_id
 		foreign key (fileId) references FileInfo (id)
-);
+) character set 'utf8mb4' collate 'utf8mb4_general_ci';

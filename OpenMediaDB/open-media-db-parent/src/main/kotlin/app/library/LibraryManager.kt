@@ -15,12 +15,9 @@ import java.io.File
 import java.nio.file.Path
 
 @Component
-internal class LibraryManager {
+internal class LibraryManager(val dataManagerFactory: DataManagerFactory) {
     val fileCrawler by lazy { FileCrawler() }
     private val log = KotlinLogging.logger {}
-
-    @Autowired
-    private lateinit var dataManagerFactory: DataManagerFactory
 
     fun getOrCreateShow(imdbId: String): Show {
         return dataManagerFactory.showDao.get(imdbId)

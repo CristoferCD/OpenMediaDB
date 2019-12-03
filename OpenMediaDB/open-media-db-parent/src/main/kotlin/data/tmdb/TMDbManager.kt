@@ -102,7 +102,7 @@ object TMDbManager {
         val background = if (item.backdropPath != null) tmdbConfig.baseUrl + tmdbConfig.backdropSizes?.last() + item.backdropPath else null
         return Show(
                 imdbId = item.imdbID,
-                name = item.originalTitle ?: item.title,
+                name = item.title ?: item.originalTitle,
                 sinopsis = item.overview,
                 totalSeasons = 1,
                 totalEpisodes = 1,
