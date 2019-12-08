@@ -2,6 +2,7 @@ package app.library
 
 import DataManagerFactory
 import FileCrawler
+import app.library.exceptions.MediaNotFoundException
 import data.FileInfo
 import data.Show
 import data.Video
@@ -19,39 +20,33 @@ internal class LibraryManager(val dataManagerFactory: DataManagerFactory) {
     val fileCrawler by lazy { FileCrawler() }
     private val log = KotlinLogging.logger {}
 
+    fun createShow(imdbId: String) {
+        log.info { "Requested creation of $imdbId" }
+        if (dataManagerFactory.showDao.get(imdbId) != null) {
+            throw Exception("Show $imdbId already registered")
+        }
+
+        val show = TMDbManager.find(imdbId) ?: throw MediaNotFoundException(imdbId, "show")
+        show.path = fileCrawler.pathForShow(show.name)
+        val newId = dataManagerFactory.showDao.insert(show)
+        val updatedShow = show.copy(imdbId = newId)
+        registerAllEpisodes(updatedShow)
+    }
+
     fun getOrCreateShow(imdbId: String): Show {
         return dataManagerFactory.showDao.get(imdbId)
                 ?: run {
-                    val show = TMDbManager.find(imdbId) ?: TODO("Throw show not found exception")
+                    val show = TMDbManager.find(imdbId) ?: throw MediaNotFoundException(imdbId, "show")
                     createShowEntry(show)
                     return show
                 }
     }
 
-    fun getOrCreateShowByName(name: String): Show {
-        return dataManagerFactory.showDao.find(name).firstOrNull()
-                ?: run {
-                    val show = TMDbManager.findByName(name) ?: TODO("Throw show not found exception")
-                    createShowEntry(show)
-                    return show
-                }
-    }
-
-    fun createOrUpdateShow(show: Show) {
-        show.path = fileCrawler.libraryRoot + "\\" + show.name
-        try {
-            dataManagerFactory.showDao.insert(show)
-        } catch (e: ExistingEntityException) {
-            dataManagerFactory.showDao.update(show)
-        }
-    }
-
-    fun registerAllEpisodes(showId: String) {
-        val show = getOrCreateShow(showId)
+    private fun registerAllEpisodes(show: Show) {
         log.info { "Updating episodes for ${show.name}" }
         TMDbManager.getEpisodesFromSeason(show, 1..show.totalSeasons).forEach {
-            log.info { "Registering episode $it" }
-            val existingEpisode = dataManagerFactory.videoDao.findFromParent(showId, it.season, it.episodeNumber)
+            log.info { "Registering episode ${it.summary()}" }
+            val existingEpisode = dataManagerFactory.videoDao.findFromParent(show.imdbId, it.season, it.episodeNumber)
             if (existingEpisode.size == 1) {
                 dataManagerFactory.videoDao.update(it.copy(id = existingEpisode.first().id, fileId = existingEpisode.first().fileId))
             } else {
@@ -66,7 +61,7 @@ internal class LibraryManager(val dataManagerFactory: DataManagerFactory) {
         return dataManagerFactory.videoDao.findFromParent(parent.imdbId, season, episodeNumber, user?.id).firstOrNull()
                 ?: run {
                     val episode = TMDbManager.getEpisode(parent.externalIds.tmdb!!, season, episodeNumber)
-                            ?: TODO("Throw episode not found exception")
+                            ?: throw MediaNotFoundException("${parent.imdbId} - $season $episodeNumber", "episode")
                     return createEpisodeEntry(episode)
                 }
     }
@@ -88,21 +83,30 @@ internal class LibraryManager(val dataManagerFactory: DataManagerFactory) {
             if (episode.fileId != null) {
                 val existingFile = dataManagerFactory.fileInfoDao.get(episode.fileId!!)
                 if (existingFile != null) {
-                    log.info { "Updating episode $episode" }
+                    log.info { "Updating episode ${episode.summary()}" }
                     dataManagerFactory.fileInfoDao.update(existingFile.copy(path = it.path!!))
                 } else {
-                    log.info { "Registering file ${it.path} for episode $episode" }
+                    log.info { "Registering file ${it.path} for episode ${episode.summary()}" }
                     insertFile(episode, it.path!!)
                 }
             } else {
-                log.info { "Registering file ${it.path} for episode $episode" }
+                log.info { "Registering file ${it.path} for episode ${episode.summary()      }" }
                 insertFile(episode, it.path!!)
             }
         }
 
         dataManagerFactory.showDao.getAll().forEach {
-            registerAllEpisodes(it.imdbId)
+            registerAllEpisodes(it)
         }
+    }
+
+    private fun getOrCreateShowByName(name: String): Show {
+        return dataManagerFactory.showDao.find(name).firstOrNull()
+                ?: run {
+                    val show = TMDbManager.findByName(name) ?: TODO("Throw show not found exception")
+                    createShowEntry(show)
+                    return show
+                }
     }
 
     fun insertFile(episode: Video, path: Path): Int {
@@ -122,8 +126,8 @@ internal class LibraryManager(val dataManagerFactory: DataManagerFactory) {
 
     private fun createShowEntry(show: Show) {
         show.path = fileCrawler.libraryRoot + "\\" + show.name
-        dataManagerFactory.showDao.insert(show)
-        registerAllEpisodes(show.imdbId)
+        val newId = dataManagerFactory.showDao.insert(show)
+        registerAllEpisodes(show.copy(imdbId = newId))
     }
 
     private fun createEpisodeEntry(video: Video): Video {

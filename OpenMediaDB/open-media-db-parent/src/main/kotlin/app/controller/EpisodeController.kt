@@ -22,10 +22,7 @@ internal class EpisodeController : BaseController() {
     @GetMapping("/{id}")
     fun getEpisode(@PathVariable id: Int): Video {
         val video = dataManagerFactory.videoDao.get(id)
-        if (video != null)
-            return video
-        else
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Episode not found")
+        return video ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Episode not found")
     }
 
     @GetMapping("/{id}/subtitles")

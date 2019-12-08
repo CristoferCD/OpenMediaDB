@@ -15,4 +15,6 @@ data class Video (
         var sinopsis: String,
         var imgPoster: String?,
         var externalIds: ExternalIds
-)
+) {
+    fun summary() = "Video[$id]: ${season}x$episodeNumber - $name aired $airDate"
+}
