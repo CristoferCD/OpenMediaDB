@@ -7,9 +7,7 @@ import data.FileInfo
 import data.Show
 import data.Video
 import data.tmdb.TMDbManager
-import exceptions.ExistingEntityException
 import mu.KotlinLogging
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import java.io.File
@@ -19,6 +17,10 @@ import java.nio.file.Path
 internal class LibraryManager(val dataManagerFactory: DataManagerFactory) {
     val fileCrawler by lazy { FileCrawler() }
     private val log = KotlinLogging.logger {}
+
+    fun getShow(imdbId: String): Show {
+        return dataManagerFactory.showDao.get(imdbId) ?: throw MediaNotFoundException(imdbId, "show")
+    }
 
     fun createShow(imdbId: String) {
         log.info { "Requested creation of $imdbId" }
@@ -31,15 +33,6 @@ internal class LibraryManager(val dataManagerFactory: DataManagerFactory) {
         val newId = dataManagerFactory.showDao.insert(show)
         val updatedShow = show.copy(imdbId = newId)
         registerAllEpisodes(updatedShow)
-    }
-
-    fun getOrCreateShow(imdbId: String): Show {
-        return dataManagerFactory.showDao.get(imdbId)
-                ?: run {
-                    val show = TMDbManager.find(imdbId) ?: throw MediaNotFoundException(imdbId, "show")
-                    createShowEntry(show)
-                    return show
-                }
     }
 
     private fun registerAllEpisodes(show: Show) {
@@ -55,15 +48,17 @@ internal class LibraryManager(val dataManagerFactory: DataManagerFactory) {
         }
     }
 
-    fun getOrCreateEpisode(parent: Show, season: Int, episodeNumber: Int): Video {
+    fun getEpisode(parentId: String, season: Int, episodeNumber: Int): Video {
         val username = SecurityContextHolder.getContext().authentication?.name
         val user = if (username != null) dataManagerFactory.userDao.findByName(username) else null
-        return dataManagerFactory.videoDao.findFromParent(parent.imdbId, season, episodeNumber, user?.id).firstOrNull()
-                ?: run {
-                    val episode = TMDbManager.getEpisode(parent.externalIds.tmdb!!, season, episodeNumber)
-                            ?: throw MediaNotFoundException("${parent.imdbId} - $season $episodeNumber", "episode")
-                    return createEpisodeEntry(episode)
-                }
+        return dataManagerFactory.videoDao.findFromParent(parentId, season, episodeNumber, user?.id).firstOrNull()
+                ?: throw MediaNotFoundException("${parentId} - $season $episodeNumber", "episode")
+    }
+
+    fun createEpisode(parentTmdbId: Int, season: Int, episodeNumber: Int): Video {
+        val episode = TMDbManager.getEpisode(parentTmdbId, season, episodeNumber)
+                ?: throw MediaNotFoundException("$parentTmdbId - $season $episodeNumber", "episode")
+        return createEpisodeEntry(episode)
     }
 
     fun refreshLibrary() {
@@ -79,7 +74,11 @@ internal class LibraryManager(val dataManagerFactory: DataManagerFactory) {
                 createdShows[it.name] = show
             }
 
-            val episode = getOrCreateEpisode(createdShows[it.name]!!, it.season, it.episode)
+            val episode = try {
+                getEpisode(createdShows[it.name]!!.imdbId, it.season, it.episode)
+            } catch (ex: MediaNotFoundException) {
+                createEpisode(createdShows[it.name]!!.externalIds.tmdb!!, it.season, it.episode)
+            }
             if (episode.fileId != null) {
                 val existingFile = dataManagerFactory.fileInfoDao.get(episode.fileId!!)
                 if (existingFile != null) {
@@ -90,7 +89,7 @@ internal class LibraryManager(val dataManagerFactory: DataManagerFactory) {
                     insertFile(episode, it.path!!)
                 }
             } else {
-                log.info { "Registering file ${it.path} for episode ${episode.summary()      }" }
+                log.info { "Registering file ${it.path} for episode ${episode.summary()}" }
                 insertFile(episode, it.path!!)
             }
         }

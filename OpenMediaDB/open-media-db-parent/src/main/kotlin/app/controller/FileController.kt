@@ -34,8 +34,8 @@ internal class FileController : BaseController() {
     @PostMapping
     fun uploadFile(@RequestParam showId: String, @RequestParam season: Int, @RequestParam episode: Int, @RequestParam file: MultipartFile): String {
         log.info { "[uploadFile] - showId: $showId, season: $season, episode: $episode, file: ${file.originalFilename}-${file.contentType}" }
-        val show = libraryManager.getOrCreateShow(showId)
-        val episodeInfo = libraryManager.getOrCreateEpisode(show, season, episode)
+        val show = libraryManager.getShow(showId)
+        val episodeInfo = libraryManager.getEpisode(show.imdbId, season, episode)
         val dotIdx = file.originalFilename!!.lastIndexOf('.')
         val extension = file.originalFilename!!.substring(dotIdx + 1)
         val path = libraryManager.fileCrawler.importData(VideoFileInfo(
@@ -54,14 +54,14 @@ internal class FileController : BaseController() {
     }
 
     private fun String.sha512Token(): String {
-        val hex_chars = "0123456789ABCDEF"
+        val hexChars = "0123456789ABCDEF"
         val bytes = MessageDigest.getInstance("SHA-512")
                 .digest(this.toByteArray())
         val result = StringBuilder(bytes.size * 2)
         bytes.forEach {
             val i = it.toInt()
-            result.append(hex_chars[i shr 4 and 0x0f])
-            result.append(hex_chars[i and 0x0f])
+            result.append(hexChars[i shr 4 and 0x0f])
+            result.append(hexChars[i and 0x0f])
         }
         return result.toString()
     }
