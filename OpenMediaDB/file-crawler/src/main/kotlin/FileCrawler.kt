@@ -76,4 +76,6 @@ class FileCrawler {
         name = name.replace("(?<epName>.+)", info.episodeName.replace("/", "_"))
         return name.replace("[:/*\"?|<>] ?".toRegex(), " ")
     }
+
+    fun pathForShow(name: String) = libraryRoot + File.pathSeparator + name
 }

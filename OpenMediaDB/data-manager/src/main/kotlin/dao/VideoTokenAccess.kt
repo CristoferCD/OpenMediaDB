@@ -50,7 +50,7 @@ class VideoTokenManager(override val dbConnection: Database) : IBaseManager<Vide
                     expires = DateTime(obj.expires.toInstant().toEpochMilli())
                 }.id.value
             } catch (e: ExposedSQLException) {
-                if (e.toString().contains(Regex("\\[SQLITE_CONSTRAINT.*UNIQUE")))
+                if (e.message?.contains("Duplicate entry") == true)
                     throw ExistingEntityException("VideoTokenTable", obj.token, e)
                 else throw e
             }

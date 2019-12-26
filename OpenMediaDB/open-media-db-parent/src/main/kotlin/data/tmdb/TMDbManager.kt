@@ -4,6 +4,7 @@ import data.ExternalIds
 import data.Show
 import data.Video
 import data.response.PagedResponse
+import info.movito.themoviedbapi.TmdbApi
 import info.movito.themoviedbapi.TmdbFind
 import info.movito.themoviedbapi.TmdbTV
 import info.movito.themoviedbapi.TmdbTvEpisodes
@@ -13,17 +14,13 @@ import info.movito.themoviedbapi.model.tv.TvSeries
 import java.time.LocalDate
 
 object TMDbManager {
-    val apiAccess by lazy {
-        tmdbApi {
-            defaultLanguage("en")
-        }
-    }
 
-    val tmdbConfig by lazy { apiAccess.configuration ?: TODO("Init exception")}
+    private val tmdbApi = TmdbApi(System.getenv("OPENMEDIADB_TMDB_API"))
+    private const val language = "en"
 
     fun find(imdbId: String): Show? {
-        apiAccess.find.find(imdbId, TmdbFind.ExternalSource.imdb_id, "en").let {
-            return it.tvResults?.firstOrNull()?.let { toTVShow(it)} ?: run {
+        tmdbApi.find.find(imdbId, TmdbFind.ExternalSource.imdb_id, language).let {
+            return it.tvResults?.firstOrNull()?.let { toTVShow(it) } ?: run {
                 it.movieResults?.firstOrNull()?.let { toMovie(it) }
             }
         }
@@ -32,7 +29,7 @@ object TMDbManager {
     fun getEpisodesFromSeason(parent: Show, seasons: IntRange): List<Video> {
         val videoList = mutableListOf<Video>()
         for (i in seasons) {
-            val season = TMDbManager.apiAccess.tvSeasons.getSeason(parent.externalIds.tmdb!!, i, "en")
+            val season = tmdbApi.tvSeasons.getSeason(parent.externalIds.tmdb!!, i, language)
             videoList.addAll(season.episodes.mapNotNull {
                 toVideo(it, parent.imdbId)
             })
@@ -40,15 +37,15 @@ object TMDbManager {
         return videoList
     }
 
-    fun getEpisode(tmdbParentId: Int, season: Int, episode: Int): Video? {
-        val episode = apiAccess.tvEpisodes.getEpisode(tmdbParentId, season, episode, "en",
+    fun getEpisode(tmdbParentId: Int, season: Int, episodeNumber: Int): Video? {
+        val episode = tmdbApi.tvEpisodes.getEpisode(tmdbParentId, season, episodeNumber, language,
                 TmdbTvEpisodes.EpisodeMethod.external_ids, TmdbTvEpisodes.EpisodeMethod.images)
-        val parent = apiAccess.tvSeries.getSeries(tmdbParentId, "en", TmdbTV.TvMethod.external_ids)
+        val parent = tmdbApi.tvSeries.getSeries(tmdbParentId, language, TmdbTV.TvMethod.external_ids)
         return toVideo(episode, parent.externalIds.imdbId)
     }
 
     fun search(query: String, page: Int = 0): PagedResponse<Show> {
-        val searchResult = apiAccess.search.searchMulti(query, "en", page)
+        val searchResult = tmdbApi.search.searchMulti(query, language, page)
         val showList = searchResult.results.mapNotNull {
             when (it) {
                 is TvSeries -> toTVShow(it)
@@ -65,7 +62,7 @@ object TMDbManager {
     }
 
     fun findByName(name: String): Show? {
-        apiAccess.search.searchMulti(name, "en", 0).results?.firstOrNull()?.let {
+        tmdbApi.search.searchMulti(name, language, 0).results?.firstOrNull()?.let {
             return when (it) {
                 is TvSeries -> toTVShow(it)
                 is MovieDb -> toMovie(it)
@@ -76,10 +73,10 @@ object TMDbManager {
     }
 
     private fun toTVShow(tvShow: TvSeries): Show? {
-        val item = apiAccess.tvSeries.getSeries(tvShow.id, "en", TmdbTV.TvMethod.external_ids)
+        val item = tmdbApi.tvSeries.getSeries(tvShow.id, language, TmdbTV.TvMethod.external_ids)
         if (item.externalIds.imdbId == null) return null
-        val poster = if (item.posterPath != null) tmdbConfig.baseUrl + tmdbConfig.posterSizes?.last() + item.posterPath else null
-        val background = if (item.backdropPath != null) tmdbConfig.baseUrl + tmdbConfig.backdropSizes?.last() + item.backdropPath else null
+        val poster = if (item.posterPath != null) tmdbApi.configuration.baseUrl + tmdbApi.configuration.posterSizes?.last() + item.posterPath else null
+        val background = if (item.backdropPath != null) tmdbApi.configuration.baseUrl + tmdbApi.configuration.backdropSizes?.last() + item.backdropPath else null
         return Show(
                 imdbId = item.externalIds.imdbId,
                 name = item.name ?: item.originalName,
@@ -96,10 +93,10 @@ object TMDbManager {
     }
 
     private fun toMovie(movie: MovieDb): Show? {
-        val item = apiAccess.movies.getMovie(movie.id, "en")
+        val item = tmdbApi.movies.getMovie(movie.id, language)
         if (item.imdbID == null) return null
-        val poster = if (item.posterPath != null) tmdbConfig.baseUrl + tmdbConfig.posterSizes?.last() + item.posterPath else null
-        val background = if (item.backdropPath != null) tmdbConfig.baseUrl + tmdbConfig.backdropSizes?.last() + item.backdropPath else null
+        val poster = if (item.posterPath != null) tmdbApi.configuration.baseUrl + tmdbApi.configuration.posterSizes?.last() + item.posterPath else null
+        val background = if (item.backdropPath != null) tmdbApi.configuration.baseUrl + tmdbApi.configuration.backdropSizes?.last() + item.backdropPath else null
         return Show(
                 imdbId = item.imdbID,
                 name = item.title ?: item.originalTitle,
@@ -116,7 +113,7 @@ object TMDbManager {
 
     private fun toVideo(episode: TvEpisode, parentId: String): Video? {
         val image = episode.images?.stills?.firstOrNull()?.filePath
-        val poster = if (image != null) tmdbConfig.baseUrl + tmdbConfig.posterSizes?.last() + image else null
+        val poster = if (image != null) tmdbApi.configuration.baseUrl + tmdbApi.configuration.posterSizes?.last() + image else null
         return Video(
                 id = null,
                 fileId = null,
