@@ -1,5 +1,6 @@
 package dao
 
+import dao.ShowTestData.`User in db`
 import data.*
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.BehaviorSpec
@@ -38,7 +39,7 @@ class VideoDaoTest : BehaviorSpec({
                         trakt = 34
                 )
         ))
-        val userId = fact.userDao.insert(User(null, "test", "test"))
+        val userId = `User in db`()
         When("retrieve the video by id") {
             val video = fact.videoDao.get("tt2178788")
             Then("it should be the one inserted") {

@@ -24,7 +24,8 @@ object ShowTestData {
     }
 
     fun `User in db`(): Int {
-        return fact.userDao.insert(User(null, "test", "test"))
+        val user = fact.userDao.findByName("test")
+        return user?.id ?: fact.userDao.insert(User(null, "test", "test"))
     }
 
     fun `User follows show`(user: Int, show: String) {
