@@ -6,7 +6,7 @@ import java.net.URL
 import java.net.URLEncoder
 
 object OmdbAPI {
-    private val apiKey: String = this.javaClass.getResource("api-key.txt").readText()
+    private val apiKey: String = System.getenv("OPENMEDIADB_OMDB_API")
     private val baseUrl: String = "http://www.omdbapi.com/"
     private val gson : Gson = Gson()
 

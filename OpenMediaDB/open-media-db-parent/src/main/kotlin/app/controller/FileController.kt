@@ -34,8 +34,8 @@ internal class FileController : BaseController() {
     @PostMapping
     fun uploadFile(@RequestParam showId: String, @RequestParam season: Int, @RequestParam episode: Int, @RequestParam file: MultipartFile): String {
         log.info { "[uploadFile] - showId: $showId, season: $season, episode: $episode, file: ${file.originalFilename}-${file.contentType}" }
-        val show = libraryManager.getOrCreateShow(showId)
-        val episodeInfo = libraryManager.getOrCreateEpisode(show, season, episode)
+        val show = libraryManager.getShow(showId)
+        val episodeInfo = libraryManager.getEpisode(show.imdbId, season, episode)
         val dotIdx = file.originalFilename!!.lastIndexOf('.')
         val extension = file.originalFilename!!.substring(dotIdx + 1)
         val path = libraryManager.fileCrawler.importData(VideoFileInfo(
@@ -48,91 +48,20 @@ internal class FileController : BaseController() {
         return "Created video with reference $fileId"
     }
 
-//    @PostMapping
-//    fun uploadFile(req: HttpServletRequest) {
-//        try {
-//            if (!ServletFileUpload.isMultipartContent(req))
-//                throw ResponseStatusException(HttpStatus.METHOD_NOT_ALLOWED, "Must be a multipart request")
-//
-//            val showId = req.getParameter("showId")
-//            val season = req.getParameter("season")
-//            val episode = req.getParameter("episode")
-//            log.info { "Got parameters: [$showId] ${season}x$episode" }
-//            val iter = ServletFileUpload().getItemIterator(req)
-//            while(iter.hasNext()) {
-//                val item = iter.next()
-//                val name = item.fieldName
-//                log.info { "Item name: $name (${item.isFormField}" }
-//            }
-//        } catch (e: FileUploadException) {
-//            log.error { "File upload error $e" }
-//        } catch (e: IOException) {
-//            log.error { "Internal server IO error $e" }
-//        }
-//    }
-
-//    @PostMapping
-//    fun uploadFile(@RequestParam file: MultipartFile): String {
-//        println("Received ${file.originalFilename} and type ${file.contentType}")
-//        val dotIdx = file.originalFilename!!.lastIndexOf('.')
-//        val nameWithoutExtension = file.originalFilename!!.substring(0, dotIdx)
-//        val extension = file.originalFilename!!.substring(dotIdx + 1)
-//        try {
-//            val videoInfo = libraryManager.fileCrawler.parseFileName(nameWithoutExtension)
-//            val show = libraryManager.getOrCreateShowByName(videoInfo.name)
-//            val path = libraryManager.fileCrawler.importData(videoInfo, extension, file.bytes)
-//            val fileId = dataManagerFactory.fileInfoDao.insert(FileInfo(
-//                    id = null,
-//                    codec = "",
-//                    bitrate = "",
-//                    resolution = "",
-//                    duration = null,
-//                    path = path
-//            ))
-//            val videoLocally = dataManagerFactory.videoDao.findFromParent(show.imdbId, videoInfo.season.toInt(), videoInfo.episode.toInt())
-//            if (videoLocally.isEmpty()) {
-//                val tmdbEpisode = TMDbManager.apiAccess.tvEpisodes.getEpisode(show.externalIds.tmdb!!,
-//                        videoInfo.season.toInt(), videoInfo.episode.toInt(), "en", TmdbTvEpisodes.EpisodeMethod.external_ids)
-//                dataManagerFactory.videoDao.insert(Video(
-//                        id = null,
-//                        showId = show.imdbId,
-//                        imdbId = tmdbEpisode.externalIds.imdbId,
-//                        sinopsis = tmdbEpisode.overview,
-//                        name = tmdbEpisode.name,
-//                        episodeNumber = tmdbEpisode.episodeNumber,
-//                        season = tmdbEpisode.seasonNumber,
-//                        imgPoster = null,
-//                        fileId = fileId,
-//                        externalIds = ExternalIds(imdb = tmdbEpisode.externalIds?.imdbId,
-//                                tvdb = tmdbEpisode.externalIds?.tvdbId?.toInt(),
-//                                tmdb = tmdbEpisode.id)
-//                ))
-//            } else {
-//                val local = videoLocally.first()
-//                local.fileId = fileId
-//                dataManagerFactory.videoDao.update(local)
-//            }
-//
-//            return "Successfully imported"
-//        } catch (e: FileParseException) {
-//            return e.message ?: "Error"
-//        }
-//    }
-
     @DeleteMapping("/{id}")
     fun deleteFile(@PathVariable id: Int) {
         dataManagerFactory.fileInfoDao.delete(id)
     }
 
     private fun String.sha512Token(): String {
-        val hex_chars = "0123456789ABCDEF"
+        val hexChars = "0123456789ABCDEF"
         val bytes = MessageDigest.getInstance("SHA-512")
                 .digest(this.toByteArray())
         val result = StringBuilder(bytes.size * 2)
         bytes.forEach {
             val i = it.toInt()
-            result.append(hex_chars[i shr 4 and 0x0f])
-            result.append(hex_chars[i and 0x0f])
+            result.append(hexChars[i shr 4 and 0x0f])
+            result.append(hexChars[i and 0x0f])
         }
         return result.toString()
     }

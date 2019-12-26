@@ -86,7 +86,7 @@ class VideoManager(override val dbConnection: Database) : IBaseManager<Video, In
                     externalIds = extId
                 }.id.value
             } catch (e: ExposedSQLException) {
-                if (e.toString().contains(Regex("\\[SQLITE_CONSTRAINT.*UNIQUE")))
+                if (e.message?.contains("Duplicate entry") == true)
                     throw ExistingEntityException("VideoTable", obj.imdbId ?: "null", e)
                 else throw e
             }

@@ -12,8 +12,8 @@
     <artifactId>data-manager</artifactId>
 
     <properties>
-        <testcontainers.version>1.11.3</testcontainers.version>
-        <mariadb.jdbc.version>2.4.2</mariadb.jdbc.version>
+        <testcontainers.version>1.12.4</testcontainers.version>
+        <mariadb.jdbc.version>2.5.2</mariadb.jdbc.version>
     </properties>
 
     <dependencies>

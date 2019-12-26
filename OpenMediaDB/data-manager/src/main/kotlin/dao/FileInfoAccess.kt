@@ -50,7 +50,7 @@ class FileInfoManager(override val dbConnection: Database) : IBaseManager<FileIn
                     codec = obj.codec
                 }.id.value
             } catch (e: ExposedSQLException) {
-                if (e.toString().contains(Regex("\\[SQLITE_CONSTRAINT.*UNIQUE")))
+                if (e.message?.contains("Duplicate entry") == true)
                     throw ExistingEntityException("FileInfoTable", obj.path.toString(), e)
                 else throw e
             }

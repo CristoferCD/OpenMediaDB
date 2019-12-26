@@ -44,7 +44,7 @@ class UserManager(override val dbConnection: Database) : IBaseManager<User, Int>
                     password = obj.password
                 }.id.value
             } catch (e: ExposedSQLException) {
-                if (e.toString().contains(Regex("\\[SQLITE_CONSTRAINT.*UNIQUE")))
+                if (e.message?.contains("Duplicate entry") == true)
                     throw ExistingEntityException("UserTable", obj.name, e)
                 else throw e
             }

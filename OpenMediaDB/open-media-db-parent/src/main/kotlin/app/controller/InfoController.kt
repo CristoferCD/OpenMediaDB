@@ -19,6 +19,6 @@ internal class InfoController : BaseController() {
 
     @GetMapping("/api/json")
     @ResponseBody
-    fun jsonFile() = BufferedReader(InputStreamReader(apiJson.inputStream)).lines()
+    fun jsonFile() : String = BufferedReader(InputStreamReader(apiJson.inputStream)).lines()
             .collect(Collectors.joining(System.lineSeparator()))
 }

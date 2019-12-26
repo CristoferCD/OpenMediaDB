@@ -13,8 +13,7 @@ internal class ShowController : BaseController() {
 
     @PostMapping
     fun registerShow(@RequestParam imdbId: String) {
-        log.info { "Requested creation of $imdbId" }
-        libraryManager.getOrCreateShow(imdbId)
+        libraryManager.createShow(imdbId)
     }
 
     @GetMapping
@@ -35,7 +34,7 @@ internal class ShowController : BaseController() {
                 ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not logged in")
         dataManagerFactory.showDao.follow(value, id, user)
         //TODO: check
-        return true
+        return value
     }
 
     @GetMapping("/find")
@@ -46,11 +45,7 @@ internal class ShowController : BaseController() {
     @GetMapping("/{id}")
     fun getShow(@PathVariable id: String): Show {
         val show = dataManagerFactory.showDao.get(id)
-        if (show == null) {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Show with requested id doesn't exist")
-        } else {
-            return show
-        }
+        return show ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Show with requested id doesn't exist")
     }
 
     @DeleteMapping("/{id}")
@@ -60,7 +55,6 @@ internal class ShowController : BaseController() {
 
     @GetMapping("/search")
     fun search(@RequestParam query: String, @RequestParam(required = false) page: Int?): PagedResponse<Show> {
-        val searchResult = if (page == null) TMDbManager.search(query) else TMDbManager.search(query, page)
-        return searchResult
+        return if (page == null) TMDbManager.search(query) else TMDbManager.search(query, page)
     }
 }

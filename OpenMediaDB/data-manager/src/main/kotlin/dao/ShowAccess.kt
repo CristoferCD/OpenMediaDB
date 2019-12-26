@@ -71,7 +71,7 @@ class ShowManager(override val dbConnection: Database) : IBaseManager<Show, Stri
                 }.id.value
             }
         } catch (e: ExposedSQLException) {
-            if (e.toString().contains(Regex("\\[SQLITE_CONSTRAINT.*UNIQUE")))
+            if (e.message?.contains("Duplicate entry") == true)
                 throw ExistingEntityException("ShowTable", obj.imdbId, e)
             else throw e
         }

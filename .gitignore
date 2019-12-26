@@ -42,3 +42,5 @@ OpenMediaDB/omdb-api/.kotlintest/
 OpenMediaDB/open-media-db-parent/.kotlintest/
 
 OpenMediaDB/subtitle-manager/.kotlintest/
+
+OpenMediaDB/test-report/target/
