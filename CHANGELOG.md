@@ -7,3 +7,8 @@
 # 0.1.1 (2019-12-26)
 
 - Fixed "/following" query
+
+# 0.2 (2019-12-26)
+
+- Fixed foreign characters in movie name.
+- Deployment improvements.
