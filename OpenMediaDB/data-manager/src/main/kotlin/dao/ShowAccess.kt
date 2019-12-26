@@ -119,9 +119,9 @@ class ShowManager(override val dbConnection: Database) : IBaseManager<Show, Stri
 
     fun listFollowing(userId: Int): List<Show> {
         return transaction(dbConnection) {
-            ShowDao.find {
+            FollowingDao.find {
                 (FollowingTable.userId eq userId) and (FollowingTable.following eq true)
-            }.map(ShowDao::toDataClass)
+            }.map { it.show.toDataClass() }
         }
     }
 
