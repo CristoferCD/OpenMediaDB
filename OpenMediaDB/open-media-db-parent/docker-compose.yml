@@ -6,6 +6,8 @@ services:
      - "7890:7890"
     environment:
       - OMEDIADB_HOST=mariadb
+      - OPENMEDIADB_TMDB_API=$OPENMEDIADB_TMDB_API
+      - OPENMEDIADB_OMDB_API=$OPENMEDIADB_OMDB_API
     depends_on:
       - mariadb
   mariadb:

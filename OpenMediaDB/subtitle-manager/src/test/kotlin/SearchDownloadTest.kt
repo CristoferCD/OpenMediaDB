@@ -3,7 +3,7 @@ import io.kotlintest.specs.StringSpec
 
 class SearchDownloadTest : StringSpec({
     "test" {
-        val result = SubtitleManager.search("game of thrones", 8, 6)
+        val result = SubtitleManager.search("the magicians", 5, 8)
         println(result)
         val path = SubtitleManager.download(result.first())
         println("Downloaded subtitle to $path")

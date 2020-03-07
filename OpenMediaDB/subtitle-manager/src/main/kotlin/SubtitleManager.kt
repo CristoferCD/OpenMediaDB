@@ -1,3 +1,4 @@
+import com.github.junrar.Archive
 import data.Subtitle
 import mu.KotlinLogging
 import org.jsoup.Jsoup
@@ -50,13 +51,12 @@ object SubtitleManager {
 
     fun download(subtitle: Subtitle): List<Path> {
         val doc = Jsoup.connect(subtitle.url).get()
-        val link = doc.select("#detalle_datos_derecha > .detalle_link")?.map { it.attr("href") }?.firstOrNull { it.contains("bajar.php") }
+        val link = doc.select("#detalle_datos a.link1")?.map { it.attr("href") }?.firstOrNull { it.contains("bajar.php") }
         println("Link: $link")
-        val file = manageDownload(URL("$baseUrl/$link"))
-        return unzip(file)
+        return manageDownload(URL(link))
     }
 
-    private fun manageDownload(url: URL): Path {
+    private fun manageDownload(url: URL): List<Path> {
         var connection = url.openConnection() as HttpURLConnection
 
         if (connection.responseCode in listOf(HttpURLConnection.HTTP_MOVED_TEMP, HttpURLConnection.HTTP_MOVED_PERM, HttpURLConnection.HTTP_SEE_OTHER)) {
@@ -64,14 +64,17 @@ object SubtitleManager {
             connection = URL(redirect).openConnection() as HttpURLConnection
         }
 
-        val extension = when(connection.contentType) {
-            "application/zip" -> ".zip"
-            "application/x-rar-compressed" -> ".rar"
-            else -> ""
+        return when(connection.contentType) {
+            "application/zip" -> createZip(connection.inputStream)
+            "application/x-rar-compressed" -> createRar(connection.inputStream)
+            else -> emptyList()
         }
-        val file = createTempFile("sub", extension).toPath()
-        Files.copy(connection.inputStream, file, StandardCopyOption.REPLACE_EXISTING)
-        return file
+    }
+
+    private fun createZip(inputStream: InputStream) : List<Path> {
+        val file = createTempFile("sub", ".zip").toPath()
+        Files.copy(inputStream, file, StandardCopyOption.REPLACE_EXISTING)
+        return unzip(file)
     }
 
     private fun unzip(path: Path): List<Path> {
@@ -87,6 +90,26 @@ object SubtitleManager {
         }
         zis.closeEntry()
         zis.close()
+        return extractedFiles
+    }
+
+    private fun createRar(inputStream: InputStream) : List<Path> {
+        val file = createTempFile("sub", ".rar").toPath()
+        Files.copy(inputStream, file, StandardCopyOption.REPLACE_EXISTING)
+        return unrar(file)
+    }
+
+    private fun unrar(path: Path) : List<Path> {
+        val extractedFiles = mutableListOf<Path>()
+        val archive = Archive(path.toFile().inputStream())
+        val destDir = Files.createTempDirectory("omediadb-subs")
+        archive.fileHeaders.forEach {fh ->
+            val newFile = File(destDir.toFile(), fh.fileNameString)
+            newFile.outputStream().use {os ->
+                archive.extractFile(fh, os)
+            }
+            extractedFiles.add(newFile.toPath())
+        }
         return extractedFiles
     }
 }
