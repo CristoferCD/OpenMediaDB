@@ -3,10 +3,9 @@ import io.kotlintest.specs.StringSpec
 
 class SearchDownloadTest : StringSpec({
     "test" {
-        val result = SubtitleManager.search("the magicians", 5, 8)
+        val result = SubtitleManager.search("the rookie", 2, 14)
         println(result)
-        val path = SubtitleManager.download(result.first())
-        println("Downloaded subtitle to $path")
-        path.shouldNotBeEmpty()
+        val arrays = result.mapNotNull { SubtitleManager.get(it) }
+        arrays.shouldNotBeEmpty()
     }
 })
