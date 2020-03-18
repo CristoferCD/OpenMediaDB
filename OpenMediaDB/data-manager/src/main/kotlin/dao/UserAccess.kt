@@ -3,7 +3,7 @@ package dao
 import data.User
 import data.tables.UserTable
 import exceptions.ExistingEntityException
-import org.jetbrains.exposed.dao.EntityID
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.exceptions.ExposedSQLException

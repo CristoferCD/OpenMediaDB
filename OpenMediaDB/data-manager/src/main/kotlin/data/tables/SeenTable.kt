@@ -1,6 +1,6 @@
 package data.tables
 
-import org.jetbrains.exposed.dao.IntIdTable
+import org.jetbrains.exposed.dao.id.IntIdTable
 
 internal object SeenTable : IntIdTable("Seen") {
     val userId = reference("userId", UserTable)

@@ -12,8 +12,9 @@
     <artifactId>data-manager</artifactId>
 
     <properties>
-        <testcontainers.version>1.12.4</testcontainers.version>
-        <mariadb.jdbc.version>2.5.2</mariadb.jdbc.version>
+        <testcontainers.version>1.13.0</testcontainers.version>
+        <mariadb.jdbc.version>2.5.4</mariadb.jdbc.version>
+        <exposed.version>0.22.1</exposed.version>
     </properties>
 
     <dependencies>
@@ -38,6 +39,26 @@
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
             <version>${mariadb.jdbc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.exposed</groupId>
+            <artifactId>exposed-core</artifactId>
+            <version>${exposed.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.exposed</groupId>
+            <artifactId>exposed-dao</artifactId>
+            <version>${exposed.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.exposed</groupId>
+            <artifactId>exposed-jdbc</artifactId>
+            <version>${exposed.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.exposed</groupId>
+            <artifactId>exposed-java-time</artifactId>
+            <version>${exposed.version}</version>
         </dependency>
 
 
