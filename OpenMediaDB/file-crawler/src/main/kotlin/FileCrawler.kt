@@ -57,11 +57,7 @@ class FileCrawler {
     }
 
     fun importData(info: VideoFileInfo, fileExtension: String, data: InputStream): Path {
-        var directoryTarget = directoryPattern.replace("#(name)", info.name.replace("[:/*\"?|<>] ?".toRegex(), " "))
-        directoryTarget = directoryTarget.replace("#(season)", info.season.toString())
-        directoryTarget = directoryTarget.replace("/", File.separator)
-        directoryTarget = directoryTarget.replace("\\", File.separator)
-        val targetPath = Paths.get(libraryRoot, directoryTarget, "${createCorrectName(info)}.$fileExtension")
+        val targetPath = resolvePath(info.name, info.season).resolve("${createCorrectName(info)}.$fileExtension")
         CompletableFuture.runAsync {
             Files.createDirectories(targetPath.parent)
             Files.copy(data, targetPath, StandardCopyOption.REPLACE_EXISTING)
@@ -69,12 +65,24 @@ class FileCrawler {
         return targetPath
     }
 
+    fun resolvePath(name: String, season: Int): Path {
+        var directoryTarget = directoryPattern.replace("#(name)", removeInvalidCharacters(name))
+        directoryTarget = directoryTarget.replace("#(season)", season.toString())
+        directoryTarget = directoryTarget.replace("/", File.separator)
+        directoryTarget = directoryTarget.replace("\\", File.separator)
+        return Paths.get(libraryRoot, directoryTarget)
+    }
+
     private fun createCorrectName(info: VideoFileInfo): String {
         var name = shownamePattern.replace("(?<name>.+)", info.name)
-        name = name.replace("(?<season>[0-9]+)", if (info.season < 10) "0${info.season}" else info.season.toString())
-        name = name.replace("(?<episode>[0-9]+)", if (info.episode < 10) "0${info.episode}" else info.episode.toString())
+        name = name.replace("(?<season>[0-9]+)", info.season.toString().padStart(2, '0'))
+        name = name.replace("(?<episode>[0-9]+)", info.episode.toString().padStart(2, '0'))
         name = name.replace("(?<epName>.+)", info.episodeName.replace("/", "_"))
-        return name.replace("[:/*\"?|<>] ?".toRegex(), " ")
+        return removeInvalidCharacters(name)
+    }
+
+    private fun removeInvalidCharacters(path: String) : String {
+        return path.replace("[:/*\"?|<>] ?".toRegex(), " ")
     }
 
     fun pathForShow(name: String) = libraryRoot + File.pathSeparator + name

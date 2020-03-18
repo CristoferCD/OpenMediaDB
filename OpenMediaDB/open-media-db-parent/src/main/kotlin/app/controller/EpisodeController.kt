@@ -3,9 +3,13 @@ package app.controller
 import SubtitleManager
 import data.Subtitle
 import data.Video
+import org.springframework.core.io.ByteArrayResource
+import org.springframework.core.io.FileSystemResource
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
+import providers.SubtitleProviderId
 
 @RestController
 @RequestMapping("/episodes")
@@ -34,6 +38,12 @@ internal class EpisodeController : BaseController() {
             val show = dataManagerFactory.showDao.get(video.showId)
             return SubtitleManager.search(show!!.name, video.season, video.episodeNumber)
         }
+    }
+
+    @GetMapping("/subtitle", produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
+    fun getSubtitle(@RequestParam id: SubtitleProviderId, @RequestParam url: String): ByteArrayResource {
+        val bytes = SubtitleManager.get(Subtitle(id, "", "", url))
+        return ByteArrayResource(bytes!!)
     }
 
     @PostMapping("/{id}/seen")
