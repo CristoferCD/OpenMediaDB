@@ -4,7 +4,7 @@ import org.jetbrains.exposed.dao.id.IdTable
 import org.jetbrains.exposed.sql.ReferenceOption
 
 internal object ShowTable : IdTable<String>("Show") {
-    override val id = varchar("showId", 15).primaryKey().entityId()
+    override val id = varchar("showId", 15).entityId()
     val name = varchar("name", 255)
     val sinopsis = text("sinopsis", collate = "utf8mb4_general_ci")
     val totalSeasons = integer("totalSeasons").default(0)
@@ -14,4 +14,5 @@ internal object ShowTable : IdTable<String>("Show") {
     val path = text("path")
     val externalIds = reference("externalIds", ExternalIdsTable,
             onUpdate = ReferenceOption.CASCADE, onDelete = ReferenceOption.CASCADE)
+    override val primaryKey = PrimaryKey(id)
 }

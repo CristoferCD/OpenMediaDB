@@ -2,8 +2,8 @@ package dao
 
 import data.ExternalIds
 import data.Show
-import io.kotlintest.matchers.boolean.shouldBeTrue
-import io.kotlintest.specs.BehaviorSpec
+import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.shouldBe
 import util.DatabaseContainerManager
 
 
@@ -14,7 +14,7 @@ internal class DBTest : BehaviorSpec({
             val dao = DatabaseContainerManager.dataManagerFactory.showDao
             dao.insert(show)
             Then("it should be inserted") {
-                dao.getAll().any { it.imdbId == show.imdbId }.shouldBeTrue()
+                dao.getAll().any { it.imdbId == show.imdbId }.shouldBe(true)
             }
         }
     }

@@ -1,5 +1,5 @@
-import io.kotlintest.matchers.collections.shouldNotBeEmpty
-import io.kotlintest.specs.StringSpec
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldNotBeEmpty
 
 class SearchDownloadTest : StringSpec({
     "test" {

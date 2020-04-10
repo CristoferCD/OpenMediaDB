@@ -2,8 +2,8 @@ package dao
 
 import dao.ShowTestData.`User in db`
 import data.*
-import io.kotlintest.shouldBe
-import io.kotlintest.specs.BehaviorSpec
+import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.shouldBe
 import util.DatabaseContainerManager
 import java.nio.file.Paths
 

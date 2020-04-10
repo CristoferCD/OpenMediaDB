@@ -3,7 +3,6 @@ package app.controller
 import DataManagerFactory
 import data.User
 import exceptions.ExistingEntityException
-import io.kotlintest.specs.AbstractAnnotationSpec
 import io.mockk.every
 import io.mockk.spyk
 

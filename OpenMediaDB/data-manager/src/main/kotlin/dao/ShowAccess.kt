@@ -52,12 +52,12 @@ class ShowManager(override val dbConnection: Database) : IBaseManager<Show, Stri
 
     override fun insert(obj: Show): String {
         return try {
-            transaction(dbConnection) {
-                val extId = ExternalIdsDao.new {
-                    imdbId = obj.imdbId
-                    tmdbId = obj.externalIds.tmdb
-                    traktId = obj.externalIds.trakt
-                    tvdbId = obj.externalIds.tvdb
+            transaction {
+                val extId = ExternalIdsTable.insertAndGetId {
+                    it[imdbId] = obj.imdbId
+                    it[tmdbId] = obj.externalIds.tmdb
+                    it[traktId] = obj.externalIds.trakt
+                    it[tvdbId] = obj.externalIds.tvdb
                 }
                 ShowDao.new(obj.imdbId) {
                     name = obj.name
@@ -67,7 +67,7 @@ class ShowManager(override val dbConnection: Database) : IBaseManager<Show, Stri
                     imgPoster = obj.imgPoster
                     imgBackground = obj.imgBackground
                     path = obj.path
-                    externalIds = extId
+                    externalIds = ExternalIdsDao.findById(extId)!!
                 }.id.value
             }
         } catch (e: ExposedSQLException) {

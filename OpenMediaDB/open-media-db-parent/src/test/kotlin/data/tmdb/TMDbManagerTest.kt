@@ -1,17 +1,15 @@
 package data.tmdb
 
-import io.kotlintest.specs.AbstractAnnotationSpec
+import io.kotest.core.spec.style.StringSpec
 
-class TMDbManagerTest {
 
-    @AbstractAnnotationSpec.Test
-    fun findByName() {
+class TMDbManagerTest : StringSpec({
+    "findByName" {
         TMDbManager.findByName("Game of Thrones")
     }
 
-    @AbstractAnnotationSpec.Test
-    fun getEpisode() {
+    "getEpisode" {
         val episode = TMDbManager.getEpisode(1399, 8, 1)
         println(episode)
     }
-}
+})

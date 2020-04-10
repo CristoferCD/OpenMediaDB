@@ -1,10 +1,11 @@
 package util
 
-import io.kotlintest.specs.AbstractAnnotationSpec
+import io.kotest.core.spec.style.AnnotationSpec
+
 
 class StringExtensionsKtTest {
 
-    @AbstractAnnotationSpec.Test
+    @AnnotationSpec.Test
     fun diceCoefficient() {
         val correctNames = listOf("Kaguya-Sama: Love is War", "Game of Thrones", "Avengers: Endgame", "Brooklyn Nine-Nine", "Peaky Blinders")
         val testNames = listOf("Kaguya Sama Love is war", "Kaguya love war", "gme of thr0nes", "Game throne", "Av3ng3rs.3ng4m3", "brooklyn99", "broklin 99", "brooklyn nine nine", "peaky")

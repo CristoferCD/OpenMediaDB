@@ -6,9 +6,9 @@ import dao.ShowTestData.`User in db`
 import data.ExternalIds
 import data.Show
 import exceptions.ExistingEntityException
-import io.kotlintest.matchers.collections.shouldContainExactly
-import io.kotlintest.shouldThrow
-import io.kotlintest.specs.BehaviorSpec
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.collections.shouldContainExactly
 import util.DatabaseContainerManager
 
 class ShowManagerTest : BehaviorSpec({

@@ -85,5 +85,5 @@ class FileCrawler {
         return path.replace("[:/*\"?|<>] ?".toRegex(), " ")
     }
 
-    fun pathForShow(name: String) = libraryRoot + File.pathSeparator + name
+    fun pathForShow(name: String) = libraryRoot + File.separator + name
 }

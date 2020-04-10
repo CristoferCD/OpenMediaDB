@@ -2,8 +2,8 @@ package app.library
 
 import DataManagerFactory
 import dao.ShowManager
-import io.kotlintest.Spec
-import io.kotlintest.specs.StringSpec
+import io.kotest.core.spec.Spec
+import io.kotest.core.spec.style.StringSpec
 import io.mockk.every
 import io.mockk.mockk
 
