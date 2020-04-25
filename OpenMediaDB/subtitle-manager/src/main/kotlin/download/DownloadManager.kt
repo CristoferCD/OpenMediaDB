@@ -16,18 +16,32 @@ import java.util.zip.ZipInputStream
 
 object DownloadManager {
     private val log = KotlinLogging.logger {}
+    private const val userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4115.0 Safari/537.36 Edg/84.0.488.1"
 
     fun manageDownload(url: URL): List<Path> {
         var connection = url.openConnection() as HttpURLConnection
+        connection.setRequestProperty("User-Agent", userAgent)
 
         if (connection.responseCode in listOf(HttpURLConnection.HTTP_MOVED_TEMP, HttpURLConnection.HTTP_MOVED_PERM, HttpURLConnection.HTTP_SEE_OTHER)) {
             val redirect = connection.getHeaderField("Location")
             connection = URL(redirect).openConnection() as HttpURLConnection
+            connection.setRequestProperty("User-Agent", userAgent)
+        }
+
+        if (connection.responseCode != HttpURLConnection.HTTP_OK) {
+            log.error {
+                """
+                Error donwloading subtitle from url $url.
+                Response code [${connection.responseCode}]. Message: ${connection.responseMessage}
+            """.trimIndent()
+            }
+            throw SubtitleDownloadException()
         }
 
         return when (connection.contentType) {
             "application/zip" -> createZip(connection.inputStream)
             "application/x-rar-compressed" -> createRar(connection.inputStream)
+            "text/plain", "text/plain; charset=UTF-8" -> plainText(connection.inputStream)
             else -> emptyList()
         }
     }
@@ -77,5 +91,11 @@ object DownloadManager {
             extractedFiles.add(newFile.toPath())
         }
         return extractedFiles
+    }
+
+    private fun plainText(inputStream: InputStream): List<Path> {
+        val file = createTempFile("sub", ".srt").toPath()
+        Files.copy(inputStream, file, StandardCopyOption.REPLACE_EXISTING)
+        return listOf(file)
     }
 }

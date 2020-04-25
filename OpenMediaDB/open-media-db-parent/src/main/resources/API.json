@@ -183,6 +183,39 @@
         }
       }
     },
+    "/episodes/subtitle": {
+      "get": {
+        "tags": [
+          "episode"
+        ],
+        "summary": "List of available subtitles for the episode.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubtitleDownloadForm"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of subtitles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Subtitle"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/episodes/{id}/seen": {
       "post": {
         "tags": [
@@ -683,11 +716,25 @@
       "Subtitle": {
         "type": "object",
         "properties": {
+          "origin": {
+            "type": "SubtitleProviderId"
+          },
           "title": {
             "type": "string"
           },
           "description": {
             "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "SubtitleDownloadForm": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "SubtitleProviderId"
           },
           "url": {
             "type": "string"

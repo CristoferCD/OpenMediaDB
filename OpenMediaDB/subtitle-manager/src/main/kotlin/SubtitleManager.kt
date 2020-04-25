@@ -1,4 +1,4 @@
-import data.Subtitle
+import data.SubtitleDownloadForm
 import mu.KotlinLogging
 import providers.SubdivxSubtitleProvider
 
@@ -13,6 +13,6 @@ object SubtitleManager {
 
     fun search(name: String, season: Int, episode: Int) = providers.flatMap { it.search(name, season, episode) }
 
-    fun get(subtitle: Subtitle) = providers.find { it.id == subtitle.origin }?.get(subtitle)
+    fun get(subtitle: SubtitleDownloadForm) = providers.find { it.id == subtitle.provider }?.get(subtitle)
 
 }

@@ -1,6 +1,7 @@
 package providers
 
 import data.Subtitle
+import data.SubtitleDownloadForm
 import download.DownloadManager
 import mu.KotlinLogging
 import org.jsoup.Jsoup
@@ -43,7 +44,7 @@ class SubdivxSubtitleProvider : SubtitleProvider {
 
     private fun getCommonParams() = "accion=5&masdesc=&subtitulos=1&realiza_b=1"
 
-    override fun get(subtitle: Subtitle): ByteArray? {
+    override fun get(subtitle: SubtitleDownloadForm): ByteArray? {
         log.debug { "Requested download of subtitle $subtitle" }
         val doc = Jsoup.connect(subtitle.url).get()
         val link = doc.select("#detalle_datos a.link1")?.map { it.attr("href") }?.firstOrNull { it.contains("bajar.php") }
