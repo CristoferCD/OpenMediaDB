@@ -184,7 +184,7 @@
       }
     },
     "/episodes/subtitle": {
-      "get": {
+      "post": {
         "tags": [
           "episode"
         ],

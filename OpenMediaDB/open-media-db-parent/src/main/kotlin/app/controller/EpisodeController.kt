@@ -39,7 +39,7 @@ internal class EpisodeController : BaseController() {
         }
     }
 
-    @GetMapping("/subtitle", produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
+    @PostMapping("/subtitle", produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
     fun getSubtitle(@RequestBody form: SubtitleDownloadForm): ByteArrayResource {
         val bytes = SubtitleManager.get(form)
         return ByteArrayResource(bytes!!)
