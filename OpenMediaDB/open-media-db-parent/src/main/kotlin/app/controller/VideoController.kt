@@ -12,12 +12,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/video")
 @Tag(name = "Videos")
-internal class VideoController : BaseController() {
+internal interface VideoController {
     @GetMapping("/{token}", produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
     @Operation(summary = "Get video stream")
-    fun streamVideo(@PathVariable token: String): FileSystemResource {
-        val videoToken = dataManagerFactory.tokenDao.get(token)!!
-        val file = dataManagerFactory.fileInfoDao.get(videoToken.fileId)!!
-        return FileSystemResource(file.path)
-    }
+    fun streamVideo(@PathVariable token: String): FileSystemResource
 }

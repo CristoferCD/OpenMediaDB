@@ -11,18 +11,8 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @Tag(name = "Users")
-internal class UserController : BaseController() {
-
-    @Autowired
-    private lateinit var passwordEncoder: PasswordEncoder
+internal interface UserController {
 
     @PostMapping("/signup")
-    fun signup(@RequestBody user: UserRB) {
-        dataManagerFactory.userDao.insert(User(
-                id = null,
-                name = user.name,
-                password = passwordEncoder.encode(user.password)
-        ))
-        //TODO: Auto log in
-    }
+    fun signup(@RequestBody user: UserRB)
 }

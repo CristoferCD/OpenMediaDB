@@ -9,9 +9,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/movies")
 @Tag(name = "Movies", description = "Movie related operations")
-class MovieController {
+internal interface MovieController {
     @GetMapping("/{id}")
-    fun getMovie(@PathVariable id: String) {
-        TODO()
-    }
+    fun getMovie(@PathVariable id: String)
 }
