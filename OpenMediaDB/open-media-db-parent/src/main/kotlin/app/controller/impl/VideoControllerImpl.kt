@@ -1,9 +1,11 @@
-package app.controller.video
+package app.controller.impl
 
 import app.controller.BaseController
 import app.controller.VideoController
 import org.springframework.core.io.FileSystemResource
+import org.springframework.web.bind.annotation.RestController
 
+@RestController
 internal class VideoControllerImpl : VideoController, BaseController() {
     override fun streamVideo(token: String): FileSystemResource {
         val videoToken = dataManagerFactory.tokenDao.get(token)!!

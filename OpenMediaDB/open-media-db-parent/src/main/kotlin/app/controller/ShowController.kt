@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.web.bind.annotation.*
 
-@RestController
 @RequestMapping("/shows")
 @Tag(name = "Shows", description = "Show related operations")
 internal interface ShowController {

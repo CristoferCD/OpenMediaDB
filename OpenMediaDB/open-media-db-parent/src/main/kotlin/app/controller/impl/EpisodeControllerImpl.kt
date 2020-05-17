@@ -1,4 +1,4 @@
-package app.controller.episode
+package app.controller.impl
 
 import SubtitleManager
 import app.controller.BaseController
@@ -8,8 +8,10 @@ import data.SubtitleDownloadForm
 import data.Video
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 
+@RestController
 internal class EpisodeControllerImpl : EpisodeController, BaseController() {
     override fun findEpisode(showId: String, season: Int?, episode: Int?): List<Video> {
         val user = getAuthenticatedUser()

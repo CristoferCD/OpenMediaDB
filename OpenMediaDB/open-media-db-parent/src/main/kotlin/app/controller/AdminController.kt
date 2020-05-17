@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-@RestController
 @RequestMapping("/admin")
 @Tag(name = "Admin", description = "Administrative actions")
 internal interface AdminController {

@@ -1,13 +1,15 @@
-package app.controller.file
+package app.controller.impl
 
 import app.controller.BaseController
 import app.controller.FileController
 import data.VideoFileInfo
 import data.VideoToken
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.security.MessageDigest
 import java.time.ZonedDateTime
 
+@RestController
 internal class FileControllerImpl : FileController, BaseController() {
     override fun getFile(id: Int): String {
         val file = dataManagerFactory.fileInfoDao.get(id)!!

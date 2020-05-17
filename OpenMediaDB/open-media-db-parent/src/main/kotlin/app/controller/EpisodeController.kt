@@ -13,7 +13,6 @@ import org.springframework.core.io.ByteArrayResource
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 
-@RestController
 @RequestMapping("/episodes")
 @Tag(name = "Episode", description = "Operations related to a single episode")
 internal interface EpisodeController {

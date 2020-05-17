@@ -1,4 +1,4 @@
-package app.controller.show
+package app.controller.impl
 
 import app.controller.BaseController
 import app.controller.ShowController
@@ -6,8 +6,10 @@ import data.Show
 import data.response.PagedResponse
 import data.tmdb.TMDbManager
 import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 
+@RestController
 internal class ShowControllerImpl : ShowController, BaseController() {
     override fun registerShow(imdbId: String) {
         libraryManager.createShow(imdbId)

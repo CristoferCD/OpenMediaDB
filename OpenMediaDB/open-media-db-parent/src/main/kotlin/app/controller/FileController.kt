@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
-@RestController
 @RequestMapping("/files")
 @Tag(name = "Files", description = "File management")
 internal interface FileController {

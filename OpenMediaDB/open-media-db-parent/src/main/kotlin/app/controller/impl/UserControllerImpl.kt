@@ -1,4 +1,4 @@
-package app.controller.user
+package app.controller.impl
 
 import app.controller.BaseController
 import app.controller.UserController
@@ -6,7 +6,9 @@ import data.User
 import data.request.UserRB
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.web.bind.annotation.RestController
 
+@RestController
 internal class UserControllerImpl : UserController, BaseController() {
 
     @Autowired
