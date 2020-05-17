@@ -2,6 +2,9 @@ package app.controller
 
 import data.VideoFileInfo
 import data.VideoToken
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import java.security.MessageDigest
@@ -9,10 +12,12 @@ import java.time.ZonedDateTime
 
 @RestController
 @RequestMapping("/files")
+@Tag(name = "Files", description = "File management")
 internal class FileController : BaseController() {
 
     @GetMapping("/{id}")
-    fun getFile(@PathVariable id: Int): String {
+    @Operation(summary = "Get file token", description = "Returns token to consume file without authorization headers")
+    fun getFile(@Parameter(description = "File id") @PathVariable id: Int): String {
         val file = dataManagerFactory.fileInfoDao.get(id)!!
         val tokenStr = file.path.toString().sha512Token()
         val existingToken = dataManagerFactory.tokenDao.get(tokenStr)
@@ -32,6 +37,7 @@ internal class FileController : BaseController() {
     }
 
     @PostMapping
+    @Operation(summary = "Upload a file", description = "Upload a file")
     fun uploadFile(@RequestParam showId: String, @RequestParam season: Int, @RequestParam episode: Int, @RequestParam file: MultipartFile): String {
         log.info { "[uploadFile] - showId: $showId, season: $season, episode: $episode, file: ${file.originalFilename}-${file.contentType}" }
         val show = libraryManager.getShow(showId)
@@ -49,6 +55,7 @@ internal class FileController : BaseController() {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a file", description = "Delete a file")
     fun deleteFile(@PathVariable id: Int) {
         dataManagerFactory.fileInfoDao.delete(id)
     }
