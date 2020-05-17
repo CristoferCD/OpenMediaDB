@@ -5,14 +5,12 @@ import data.tables.ExternalIdsTable
 import data.tables.SeenTable
 import data.tables.VideoTable
 import exceptions.ExistingEntityException
-import org.jetbrains.exposed.dao.EntityID
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.joda.time.DateTime
-import java.time.ZoneId
 
 internal class VideoDao(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<VideoDao>(VideoTable)
@@ -36,7 +34,7 @@ internal class VideoDao(id: EntityID<Int>) : IntEntity(id) {
             imdbId = imdbId,
             name = name,
             season = season,
-            airDate = airDate.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
+            airDate = airDate,
             episodeNumber = episodeNumber,
             sinopsis = sinopsis,
             seen = seen.firstOrNull()?.seen,
@@ -79,7 +77,7 @@ class VideoManager(override val dbConnection: Database) : IBaseManager<Video, In
                     file = if (obj.fileId != null) FileInfoDao[obj.fileId as Int] else null
                     name = obj.name
                     season = obj.season
-                    airDate = DateTime(obj.airDate.year, obj.airDate.monthValue, obj.airDate.dayOfMonth, 0, 0)
+                    airDate = obj.airDate
                     episodeNumber = obj.episodeNumber
                     sinopsis = obj.sinopsis
                     imgPoster = obj.imgPoster
@@ -100,7 +98,7 @@ class VideoManager(override val dbConnection: Database) : IBaseManager<Video, In
                 imdbId = obj.imdbId
                 name = obj.name
                 season = obj.season
-                airDate = DateTime(obj.airDate.year, obj.airDate.monthValue, obj.airDate.dayOfMonth, 0, 0)
+                airDate = obj.airDate
                 episodeNumber = obj.episodeNumber
                 sinopsis = obj.sinopsis
                 imgPoster = obj.imgPoster

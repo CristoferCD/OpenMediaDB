@@ -2,9 +2,9 @@ package dao
 
 import data.ExternalIds
 import data.tables.ExternalIdsTable
-import org.jetbrains.exposed.dao.EntityID
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
+import org.jetbrains.exposed.dao.id.EntityID
 
 internal class ExternalIdsDao(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<ExternalIdsDao>(ExternalIdsTable)

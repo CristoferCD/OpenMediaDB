@@ -1,6 +1,6 @@
-import cucumber.api.java.en.Given
-import io.kotlintest.shouldBe
-import io.kotlintest.specs.StringSpec
+
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
 import java.io.File
 
 internal class FileCrawlerTest : StringSpec({

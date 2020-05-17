@@ -3,14 +3,12 @@ package dao
 import data.VideoToken
 import data.tables.VideoTokenTable
 import exceptions.ExistingEntityException
-import org.jetbrains.exposed.dao.EntityID
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.joda.time.DateTime
-import java.time.Instant
 import java.time.ZoneId
 
 internal class VideoTokenDao(id: EntityID<Int>) : IntEntity(id) {
@@ -24,7 +22,7 @@ internal class VideoTokenDao(id: EntityID<Int>) : IntEntity(id) {
             id = id.value,
             fileId = file.id.value,
             token = token,
-            expires = Instant.ofEpochMilli(expires.millis).atZone(ZoneId.systemDefault())
+            expires = expires.atZone(ZoneId.systemDefault())
     )
 }
 
@@ -47,7 +45,7 @@ class VideoTokenManager(override val dbConnection: Database) : IBaseManager<Vide
                 VideoTokenDao.new {
                     file = FileInfoDao[obj.fileId]
                     token = obj.token
-                    expires = DateTime(obj.expires.toInstant().toEpochMilli())
+                    expires = obj.expires.toLocalDateTime()
                 }.id.value
             } catch (e: ExposedSQLException) {
                 if (e.message?.contains("Duplicate entry") == true)
@@ -62,7 +60,7 @@ class VideoTokenManager(override val dbConnection: Database) : IBaseManager<Vide
             with(VideoTokenDao[obj.id!!]) {
                 file = FileInfoDao[obj.fileId]
                 token = obj.token
-                expires = DateTime(obj.expires.toInstant().toEpochMilli())
+                expires = obj.expires.toLocalDateTime()
             }
         }
     }

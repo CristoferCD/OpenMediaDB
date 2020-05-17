@@ -2,8 +2,11 @@ package app.controller
 
 import SubtitleManager
 import data.Subtitle
+import data.SubtitleDownloadForm
 import data.Video
+import org.springframework.core.io.ByteArrayResource
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 
@@ -34,6 +37,12 @@ internal class EpisodeController : BaseController() {
             val show = dataManagerFactory.showDao.get(video.showId)
             return SubtitleManager.search(show!!.name, video.season, video.episodeNumber)
         }
+    }
+
+    @PostMapping("/subtitle", produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
+    fun getSubtitle(@RequestBody form: SubtitleDownloadForm): ByteArrayResource {
+        val bytes = SubtitleManager.get(form)
+        return ByteArrayResource(bytes!!)
     }
 
     @PostMapping("/{id}/seen")

@@ -1,0 +1,24 @@
+@startuml 
+class SubtitleManager {
+    -providers: List<SubtitleProvider>
+    +search(name: String) : List<Subtitle>
+    +search(name: String, season: Int, episode: Int) : List<Subtitle>
+    +get(subtitle: Subtitle) : ByteArray
+}
+
+interface SubtitleProvider {
+    #id: SubtitleProviderId
+    +search(name: String) : List<Subtitle>
+    +search(name: String, season: Int, episode: Int) : List<Subtitle>
+    +get(subtitle: Subtitle) : ByteArray
+}
+
+SubtitleManager *-- SubtitleProvider
+
+class Subtitle {
+    +origin: SubtitleProviderId
+    +title: String
+    +description: String
+    +url: Url
+}
+@enduml

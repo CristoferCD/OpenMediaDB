@@ -1,12 +1,12 @@
-import io.kotlintest.matchers.collections.shouldNotBeEmpty
-import io.kotlintest.specs.StringSpec
+import data.SubtitleDownloadForm
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldNotBeEmpty
 
 class SearchDownloadTest : StringSpec({
     "test" {
-        val result = SubtitleManager.search("game of thrones", 8, 6)
+        val result = SubtitleManager.search("the rookie", 2, 10)
         println(result)
-        val path = SubtitleManager.download(result.first())
-        println("Downloaded subtitle to $path")
-        path.shouldNotBeEmpty()
+        val arrays = result.mapNotNull { SubtitleManager.get(SubtitleDownloadForm(it.origin, it.url)) }
+        arrays.shouldNotBeEmpty()
     }
 })
