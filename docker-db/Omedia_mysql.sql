@@ -6,7 +6,7 @@ create or replace table ExternalIds
 (
 	id int auto_increment
 		primary key,
-	imdbId varchar(15) null,
+	imdbId varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci null,
 	tmdbId int null,
 	traktId int null,
 	tvdbId int null
@@ -16,24 +16,24 @@ create or replace table FileInfo
 (
 	id int auto_increment
 		primary key,
-	path text not null,
+	path text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci not null,
 	duration int null,
-	resolution varchar(20) not null,
-	bitrate varchar(20) not null,
-	codec varchar(20) not null
+	resolution varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci not null,
+	bitrate varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci not null,
+	codec varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci not null
 ) character set 'utf8mb4' collate 'utf8mb4_general_ci';
 
 create or replace table `Show`
 (
-	showId varchar(15) not null
+	showId varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci not null
 		primary key,
-	name varchar(255) not null,
-	sinopsis text not null,
+	name varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci not null,
+	sinopsis text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci not null,
 	totalSeasons int default 0 not null,
 	totalEpisodes int default 0 not null,
-	imgPoster text null,
-	imgBackground text null,
-	path text not null,
+	imgPoster text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci null,
+	imgBackground text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci null,
+	path text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci not null,
 	externalIds int not null,
 	constraint fk_Show_externalIds_id
 		foreign key (externalIds) references ExternalIds (id)
@@ -44,8 +44,8 @@ create or replace table User
 (
 	id int auto_increment
 		primary key,
-	name varchar(255) not null,
-	password varchar(128) not null,
+	name varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci not null,
+	password varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci not null,
 	constraint User_name_unique
 		unique (name)
 ) character set 'utf8mb4' collate 'utf8mb4_general_ci';
@@ -55,7 +55,7 @@ create or replace table Following
 	id int auto_increment
 		primary key,
 	userId int not null,
-	showId varchar(15) not null,
+	showId varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci not null,
 	following tinyint(1) default 0 not null,
 	constraint fk_Following_showId_showId
 		foreign key (showId) references `Show` (showId),
@@ -68,7 +68,7 @@ create or replace table NotificationQueue
 	id int auto_increment
 		primary key,
 	userId int not null,
-	content text not null,
+	content text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci not null,
 	`read` tinyint(1) default 0 not null,
 	constraint fk_NotificationQueue_userId_id
 		foreign key (userId) references User (id)
@@ -79,14 +79,14 @@ create or replace table Video
 	id int auto_increment
 		primary key,
 	fileId int null,
-	showId varchar(15) not null,
-	imdbId varchar(15) null,
-	name varchar(255) not null,
+	showId varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci not null,
+	imdbId varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci null,
+	name varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci not null,
 	season int not null,
 	airDate date default '1970-01-01' not null,
 	episodeNumber int not null,
-	sinopsis text not null,
-	imgPoster text null,
+	sinopsis text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci not null,
+	imgPoster text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci null,
 	externalIds int not null,
 	constraint Video_imdbId_unique
 		unique (imdbId),
@@ -117,7 +117,7 @@ create or replace table VideoTokens
 	id int auto_increment
 		primary key,
 	fileId int not null,
-	token varchar(128) not null,
+	token varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci not null,
 	expires date not null,
 	constraint VideoTokens_token_unique
 		unique (token),
