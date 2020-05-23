@@ -64,13 +64,18 @@ internal class LibraryManager(val dataManagerFactory: DataManagerFactory) {
     fun refreshLibrary() {
         log.info { "Started library refresh" }
         val importResult = fileCrawler.importLibrary(File(fileCrawler.libraryRoot))
-        log.info { "Imported library from ${fileCrawler.libraryRoot}: $importResult" }
+        log.info { "Imported library from ${fileCrawler.libraryRoot}: ${importResult.successfulImports.count()} successful - ${importResult.failedImports.count()} errors" }
         if (!importResult.failedImports.isEmpty()) throw Exception("Failed to import some items") //TODO: make custom exception
 
         val createdShows = mutableMapOf<String, Show>()
         importResult.successfulImports.forEach {
             if (!createdShows.containsKey(it.name)) {
-                val show = getOrCreateShowByName(it.name)
+                var show = dataManagerFactory.showDao.find(it.name).firstOrNull()
+                if (show == null) {
+                    show = createShowByName(it.name)
+                } else {
+                    updateShowInfo(show)
+                }
                 createdShows[it.name] = show
             }
 
@@ -99,13 +104,20 @@ internal class LibraryManager(val dataManagerFactory: DataManagerFactory) {
         }
     }
 
-    private fun getOrCreateShowByName(name: String): Show {
-        return dataManagerFactory.showDao.find(name).firstOrNull()
-                ?: run {
-                    val show = TMDbManager.findByName(name) ?: TODO("Throw show not found exception")
-                    createShowEntry(show)
-                    return show
-                }
+    private fun createShowByName(name: String): Show {
+        val show = TMDbManager.findByName(name) ?: TODO("Throw show not found exception")
+        createShowEntry(show)
+        return show
+    }
+
+    private fun updateShowInfo(show: Show) {
+        TMDbManager.find(show.imdbId)?.let { updated ->
+            show.sinopsis = updated.sinopsis
+            show.totalSeasons = updated.totalSeasons
+            show.totalEpisodes = updated.totalEpisodes
+            show.imgPoster = updated.imgPoster
+            show.imgBackground = updated.imgBackground
+        }
     }
 
     fun insertFile(episode: Video, path: Path): Int {
