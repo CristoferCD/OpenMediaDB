@@ -134,7 +134,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/io.mockk/mockk -->
         <dependency>
             <groupId>io.mockk</groupId>
             <artifactId>mockk</artifactId>

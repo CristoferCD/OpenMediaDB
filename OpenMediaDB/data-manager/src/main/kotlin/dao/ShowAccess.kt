@@ -149,6 +149,16 @@ class ShowManager(override val dbConnection: Database) : IBaseManager<Show, Stri
         return shows
     }
 
+    fun findExact(name: String): Show? {
+        return transaction(dbConnection) {
+            (ShowTable innerJoin ExternalIdsTable).select {
+                ShowTable.name eq name
+            }.firstOrNull()?.let {
+                toShow(it)
+            }
+        }
+    }
+
     private fun toShow(data: ResultRow): Show {
         return Show(
                 imdbId = data[ShowTable.id].value,
