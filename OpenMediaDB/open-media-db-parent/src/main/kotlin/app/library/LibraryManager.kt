@@ -68,7 +68,7 @@ internal class LibraryManager(val dataManagerFactory: DataManagerFactory) {
         if (!importResult.failedImports.isEmpty()) throw Exception("Failed to import some items") //TODO: make custom exception
 
         importResult.successfulImports.groupBy { it.name }.forEach { (showName, episodeFile) ->
-            val show = dataManagerFactory.showDao.findExact(showName) ?: createShowByName(showName)
+            val show = dataManagerFactory.showDao.find(showName).firstOrNull() ?: createShowByName(showName)
             episodeFile.forEach {
                 importEpisode(it, show.imdbId)
             }
