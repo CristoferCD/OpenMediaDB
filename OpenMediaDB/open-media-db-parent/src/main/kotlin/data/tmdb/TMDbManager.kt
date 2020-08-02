@@ -72,6 +72,18 @@ object TMDbManager {
         return null
     }
 
+    fun findMovie(name: String): Show? {
+        return tmdbApi.search.searchMovie(name,null, language, true, 0).results.firstOrNull()?.let {
+            toMovie(it)
+        }
+    }
+
+    fun findShow(name: String): Show? {
+        return tmdbApi.search.searchTv(name, language, 0).results.firstOrNull()?.let {
+            toTVShow(it)
+        }
+    }
+
     private fun toTVShow(tvShow: TvSeries): Show? {
         val item = tmdbApi.tvSeries.getSeries(tvShow.id, language, TmdbTV.TvMethod.external_ids)
         if (item.externalIds.imdbId == null) return null

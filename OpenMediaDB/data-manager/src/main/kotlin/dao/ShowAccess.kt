@@ -136,7 +136,7 @@ class ShowManager(override val dbConnection: Database) : IBaseManager<Show, Stri
             } else {
                 ShowTable.slice(ShowTable.name).selectAll()
                         .map { it[ShowTable.name] to it[ShowTable.name].diceCoefficient(name) }
-                        .filter { it.second > 0.7 }.sortedByDescending { it.second }
+                        .filter { it.second > 0.78 }.sortedByDescending { it.second }
                         .forEach { bestMatch ->
                             (ShowTable innerJoin ExternalIdsTable).select {
                                 ShowTable.name eq bestMatch.first
@@ -147,6 +147,16 @@ class ShowManager(override val dbConnection: Database) : IBaseManager<Show, Stri
             }
         }
         return shows
+    }
+
+    fun findExact(name: String): Show? {
+        return transaction(dbConnection) {
+            (ShowTable innerJoin ExternalIdsTable).select {
+                ShowTable.name eq name
+            }.firstOrNull()?.let {
+                toShow(it)
+            }
+        }
     }
 
     private fun toShow(data: ResultRow): Show {

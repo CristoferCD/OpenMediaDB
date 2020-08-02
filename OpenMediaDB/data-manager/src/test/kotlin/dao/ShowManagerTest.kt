@@ -8,7 +8,9 @@ import data.Show
 import exceptions.ExistingEntityException
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import util.DatabaseContainerManager
 
 class ShowManagerTest : BehaviorSpec({
@@ -42,6 +44,44 @@ class ShowManagerTest : BehaviorSpec({
                 shouldThrow<ExistingEntityException> {
                     fact.showDao.insert(newShow)
                 }
+            }
+        }
+    }
+
+    Given("Show with similar name in db") {
+        val newShow = Show(
+                imdbId = "id1",
+                name = "A Certain Scientific Accelerator",
+                sinopsis = "",
+                totalSeasons = 1,
+                totalEpisodes = 1,
+                path = "",
+                externalIds = ExternalIds()
+        )
+        fact.showDao.insert(newShow)
+        When("Search for similar") {
+            val found = fact.showDao.find("A Certain Scientific Railgun")
+            Then("Should not match") {
+                found.shouldBeEmpty()
+            }
+        }
+    }
+
+    Given("Show with special characters") {
+        val show = Show(
+                imdbId = "id2",
+                name = "Kaguya-sama: Love is War",
+                sinopsis = "",
+                totalSeasons = 1,
+                totalEpisodes = 1,
+                path = "",
+                externalIds = ExternalIds()
+        )
+        fact.showDao.insert(show)
+        When("Search filtering path forbidden chars") {
+            val found = fact.showDao.find("Kaguya-sama Love is War")
+            Then("Should match") {
+                found.shouldNotBeEmpty()
             }
         }
     }

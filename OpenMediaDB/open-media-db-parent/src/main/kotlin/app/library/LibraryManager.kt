@@ -6,6 +6,7 @@ import app.library.exceptions.MediaNotFoundException
 import data.FileInfo
 import data.Show
 import data.Video
+import data.VideoFileInfo
 import data.tmdb.TMDbManager
 import mu.KotlinLogging
 import org.springframework.security.core.context.SecurityContextHolder
@@ -52,60 +53,60 @@ internal class LibraryManager(val dataManagerFactory: DataManagerFactory) {
         val username = SecurityContextHolder.getContext().authentication?.name
         val user = if (username != null) dataManagerFactory.userDao.findByName(username) else null
         return dataManagerFactory.videoDao.findFromParent(parentId, season, episodeNumber, user?.id).firstOrNull()
-                ?: throw MediaNotFoundException("${parentId} - $season $episodeNumber", "episode")
-    }
-
-    fun createEpisode(parentTmdbId: Int, season: Int, episodeNumber: Int): Video {
-        val episode = TMDbManager.getEpisode(parentTmdbId, season, episodeNumber)
-                ?: throw MediaNotFoundException("$parentTmdbId - $season $episodeNumber", "episode")
-        return createEpisodeEntry(episode)
+                ?: throw MediaNotFoundException("$parentId - $season $episodeNumber", "episode")
     }
 
     fun refreshLibrary() {
         log.info { "Started library refresh" }
-        val importResult = fileCrawler.importLibrary(File(fileCrawler.libraryRoot))
-        log.info { "Imported library from ${fileCrawler.libraryRoot}: $importResult" }
-        if (!importResult.failedImports.isEmpty()) throw Exception("Failed to import some items") //TODO: make custom exception
-
-        val createdShows = mutableMapOf<String, Show>()
-        importResult.successfulImports.forEach {
-            if (!createdShows.containsKey(it.name)) {
-                val show = getOrCreateShowByName(it.name)
-                createdShows[it.name] = show
-            }
-
-            val episode = try {
-                getEpisode(createdShows[it.name]!!.imdbId, it.season, it.episode)
-            } catch (ex: MediaNotFoundException) {
-                createEpisode(createdShows[it.name]!!.externalIds.tmdb!!, it.season, it.episode)
-            }
-            if (episode.fileId != null) {
-                val existingFile = dataManagerFactory.fileInfoDao.get(episode.fileId!!)
-                if (existingFile != null) {
-                    log.info { "Updating episode ${episode.summary()}" }
-                    dataManagerFactory.fileInfoDao.update(existingFile.copy(path = it.path!!))
-                } else {
-                    log.info { "Registering file ${it.path} for episode ${episode.summary()}" }
-                    insertFile(episode, it.path!!)
-                }
-            } else {
-                log.info { "Registering file ${it.path} for episode ${episode.summary()}" }
-                insertFile(episode, it.path!!)
-            }
-        }
 
         dataManagerFactory.showDao.getAll().forEach {
-            registerAllEpisodes(it)
+            refreshShowInfo(it)
+        }
+
+        val importResult = fileCrawler.importLibrary(File(fileCrawler.libraryRoot))
+        log.info { "Imported library from ${fileCrawler.libraryRoot}: ${importResult.successfulImports.count()} successful - ${importResult.failedImports.count()} errors" }
+        if (!importResult.failedImports.isEmpty()) throw Exception("Failed to import some items") //TODO: make custom exception
+
+        importResult.successfulImports.groupBy { it.name }.forEach { (showName, episodeFile) ->
+            val show = dataManagerFactory.showDao.find(showName).firstOrNull() ?: createShowByName(showName)
+            episodeFile.forEach {
+                importEpisode(it, show.imdbId)
+            }
         }
     }
 
-    private fun getOrCreateShowByName(name: String): Show {
-        return dataManagerFactory.showDao.find(name).firstOrNull()
-                ?: run {
-                    val show = TMDbManager.findByName(name) ?: TODO("Throw show not found exception")
-                    createShowEntry(show)
-                    return show
-                }
+    private fun importEpisode(importInfo: VideoFileInfo, parentId: String) {
+        val episode = getEpisode(parentId, importInfo.season, importInfo.episode)
+        if (episode.fileId != null) {
+            val existingFile = dataManagerFactory.fileInfoDao.get(episode.fileId!!)
+            if (existingFile != null) {
+                log.info { "Updating episode ${episode.summary()}" }
+                dataManagerFactory.fileInfoDao.update(existingFile.copy(path = importInfo.path!!))
+            } else {
+                log.info { "Registering file ${importInfo.path} for episode ${episode.summary()}" }
+                insertFile(episode, importInfo.path!!)
+            }
+        } else {
+            log.info { "Registering file ${importInfo.path} for episode ${episode.summary()}" }
+            insertFile(episode, importInfo.path!!)
+        }
+    }
+
+    private fun refreshShowInfo(show: Show) {
+        TMDbManager.find(show.imdbId)?.let { updated ->
+            show.sinopsis = updated.sinopsis
+            show.totalSeasons = updated.totalSeasons
+            show.totalEpisodes = updated.totalEpisodes
+            show.imgPoster = updated.imgPoster
+            show.imgBackground = updated.imgBackground
+        }
+        registerAllEpisodes(show)
+    }
+
+    private fun createShowByName(name: String): Show {
+        val show = TMDbManager.findShow(name) ?: TODO("Throw show not found exception")
+        createShowEntry(show)
+        return show
     }
 
     fun insertFile(episode: Video, path: Path): Int {

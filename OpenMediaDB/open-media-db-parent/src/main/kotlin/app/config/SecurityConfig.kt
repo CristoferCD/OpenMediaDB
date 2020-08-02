@@ -24,7 +24,7 @@ open class SecurityConfig(private val userAuthService: UserAuthService) : WebSec
 
     override fun configure(http: HttpSecurity?) {
         http!!.cors().and().csrf().disable().authorizeRequests()
-                .antMatchers("/login", "signup", "/api", "/api/json", "/api/json/swagger-config", "/swagger-ui/*", "/video/*").permitAll()
+                .antMatchers("/login", "/signup", "/api", "/api/json", "/api/json/swagger-config", "/swagger-ui/*", "/video/*").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(JWTAuthenticationFilter(authenticationManager()))
