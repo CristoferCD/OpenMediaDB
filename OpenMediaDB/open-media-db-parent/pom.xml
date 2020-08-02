@@ -83,6 +83,6 @@
     </build>
 
     <properties>
-        <springdoc.version>1.4.0</springdoc.version>
+        <springdoc.version>1.4.3</springdoc.version>
     </properties>
 </project>
