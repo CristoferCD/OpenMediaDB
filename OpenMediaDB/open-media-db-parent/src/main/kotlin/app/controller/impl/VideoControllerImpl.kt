@@ -21,6 +21,9 @@ internal class VideoControllerImpl : VideoController, BaseController() {
         val file = dataManagerFactory.fileInfoDao.get(videoToken.fileId)!!
         val video = FileSystemResource(file.path)
         return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
+                .headers {
+                    it.contentLength = video.contentLength()
+                }
                 .contentType(MediaTypeFactory.getMediaType(video).orElse(MediaType.APPLICATION_OCTET_STREAM))
                 .body(resourceRegion(video, headers.range.firstOrNull()))
     }
