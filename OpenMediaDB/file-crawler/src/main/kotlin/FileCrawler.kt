@@ -1,6 +1,7 @@
 import data.ImportResult
 import data.VideoFileInfo
 import exceptions.FileParseException
+import kotlinx.coroutines.*
 import java.io.File
 import java.io.InputStream
 import java.nio.file.Files
@@ -8,7 +9,6 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.util.*
-import java.util.concurrent.CompletableFuture
 
 class FileCrawler {
     private val CONFIG_FILE = "config.properties"
@@ -58,10 +58,8 @@ class FileCrawler {
 
     fun importData(info: VideoFileInfo, fileExtension: String, data: InputStream): Path {
         val targetPath = resolvePath(info.name, info.season).resolve("${createCorrectName(info)}.$fileExtension")
-        CompletableFuture.runAsync {
-            Files.createDirectories(targetPath.parent)
-            Files.copy(data, targetPath, StandardCopyOption.REPLACE_EXISTING)
-        }
+        Files.createDirectories(targetPath.parent)
+        Files.copy(data, targetPath, StandardCopyOption.REPLACE_EXISTING)
         return targetPath
     }
 
@@ -81,7 +79,7 @@ class FileCrawler {
         return removeInvalidCharacters(name)
     }
 
-    private fun removeInvalidCharacters(path: String) : String {
+    private fun removeInvalidCharacters(path: String): String {
         return path.replace("[:/*\"?|<>] ?".toRegex(), " ")
     }
 
