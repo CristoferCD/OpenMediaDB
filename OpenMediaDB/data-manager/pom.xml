@@ -12,9 +12,9 @@
     <artifactId>data-manager</artifactId>
 
     <properties>
-        <testcontainers.version>1.14.2</testcontainers.version>
-        <mariadb.jdbc.version>2.6.2</mariadb.jdbc.version>
-        <exposed.version>0.27.1</exposed.version>
+        <testcontainers.version>1.15.0</testcontainers.version>
+        <mariadb.jdbc.version>2.7.0</mariadb.jdbc.version>
+        <exposed.version>0.28.1</exposed.version>
     </properties>
 
     <dependencies>
