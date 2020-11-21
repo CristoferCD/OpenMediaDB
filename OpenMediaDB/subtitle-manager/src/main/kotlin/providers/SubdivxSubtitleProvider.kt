@@ -10,16 +10,17 @@ import java.net.URL
 class SubdivxSubtitleProvider : SubtitleProvider {
     override val id: SubtitleProviderId = SubtitleProviderId.SUBDIVX
     private val log = KotlinLogging.logger {}
-    private val baseUrl = "https://www.subdivx.com/index.php"
+    private val host = "https://www.subdivx.com/"
+    private val basePath = "index.php"
 
     override fun search(name: String): List<Subtitle> {
-        val url = "$baseUrl?buscar=$name&${getCommonParams()}"
+        val url = "$host$basePath?buscar=$name&${getCommonParams()}"
         return findSubtitlesFromSearchResults(url)
     }
 
     override fun search(name: String, season: Int, episode: Int): List<Subtitle> {
         val episodeStr = "S${season.toString().padStart(2, '0')}E${episode.toString().padStart(2, '0')}"
-        val url = "$baseUrl?buscar=$name $episodeStr&${getCommonParams()}"
+        val url = "$host$basePath?buscar=$name $episodeStr&${getCommonParams()}"
         return findSubtitlesFromSearchResults(url)
     }
 
@@ -47,9 +48,10 @@ class SubdivxSubtitleProvider : SubtitleProvider {
     override fun get(subtitle: SubtitleDownloadForm): ByteArray? {
         log.debug { "Requested download of subtitle $subtitle" }
         val doc = Jsoup.connect(subtitle.url).get()
-        val link = doc.select("#detalle_datos a.link1")?.map { it.attr("href") }?.firstOrNull { it.contains("bajar.php") }
+        val link = doc.select("#detalle_datos a.link1")?.map { it.attr("href") }?.firstOrNull { it.contains("bajar.php") }!!
         println("Link: $link")
-        val downloadedFiles = DownloadManager.manageDownload(URL(link))
+        val url = if (link.contains(host)) URL(link) else URL(host + link)
+        val downloadedFiles = DownloadManager.manageDownload(url)
         return downloadedFiles.firstOrNull()?.toFile()?.readBytes()
     }
 
